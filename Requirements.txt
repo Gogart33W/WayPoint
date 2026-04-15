@@ -1,0 +1,7 @@
+﻿System.Windows.Forms.DataVisualization //chart
+
+Microsoft.Data.SqlClient //БД
+
+BCrypt.Net-Next //Хешування
+
+MailKit //Пошта

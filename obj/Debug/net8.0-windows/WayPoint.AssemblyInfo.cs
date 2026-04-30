@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("WayPoint")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+52e1b132cbb5535e6ab7e8c384cab22bef9f4bf5")]
 [assembly: System.Reflection.AssemblyProductAttribute("WayPoint")]
 [assembly: System.Reflection.AssemblyTitleAttribute("WayPoint")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

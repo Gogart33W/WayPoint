@@ -5,3 +5,5 @@ Microsoft.Data.SqlClient //БД
 BCrypt.Net-Next //Хешування
 
 MailKit //Пошта
+
+Microsoft.Web.WebView2 //Веб-браузер

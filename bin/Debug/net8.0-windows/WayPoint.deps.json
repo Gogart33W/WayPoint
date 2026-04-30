@@ -10,8 +10,12 @@
         "dependencies": {
           "BCrypt.Net-Next": "4.1.0",
           "HIC.System.Windows.Forms.DataVisualization": "1.0.1",
-          "MailKit": "4.15.1",
-          "Microsoft.Data.SqlClient": "7.0.0"
+          "MailKit": "4.16.0",
+          "Microsoft.Data.SqlClient": "7.0.1",
+          "Microsoft.Web.WebView2": "1.0.3912.50",
+          "Microsoft.Web.WebView2.Core": "1.0.3912.50",
+          "Microsoft.Web.WebView2.WinForms": "1.0.3912.50",
+          "Microsoft.Web.WebView2.Wpf": "1.0.3912.50"
         },
         "runtime": {
           "WayPoint.dll": {}
@@ -35,7 +39,7 @@
       },
       "HIC.System.Windows.Forms.DataVisualization/1.0.1": {
         "dependencies": {
-          "Microsoft.Data.SqlClient": "7.0.0"
+          "Microsoft.Data.SqlClient": "7.0.1"
         },
         "runtime": {
           "lib/net5.0-windows7.0/System.Windows.Forms.DataVisualization.dll": {
@@ -44,15 +48,15 @@
           }
         }
       },
-      "MailKit/4.15.1": {
+      "MailKit/4.16.0": {
         "dependencies": {
-          "MimeKit": "4.15.1",
+          "MimeKit": "4.16.0",
           "System.Formats.Asn1": "8.0.1"
         },
         "runtime": {
           "lib/net8.0/MailKit.dll": {
-            "assemblyVersion": "4.15.0.0",
-            "fileVersion": "4.15.1.0"
+            "assemblyVersion": "4.16.0.0",
+            "fileVersion": "4.16.0.0"
           }
         }
       },
@@ -64,7 +68,7 @@
           }
         }
       },
-      "Microsoft.Data.SqlClient/7.0.0": {
+      "Microsoft.Data.SqlClient/7.0.1": {
         "dependencies": {
           "Microsoft.Bcl.Cryptography": "8.0.0",
           "Microsoft.Data.SqlClient.Extensions.Abstractions": "1.0.0",
@@ -80,7 +84,7 @@
         "runtime": {
           "lib/net8.0/Microsoft.Data.SqlClient.dll": {
             "assemblyVersion": "7.0.0.0",
-            "fileVersion": "7.0.0.26076"
+            "fileVersion": "7.0.1.26114"
           }
         },
         "resources": {
@@ -129,13 +133,13 @@
             "rid": "unix",
             "assetType": "runtime",
             "assemblyVersion": "7.0.0.0",
-            "fileVersion": "7.0.0.26076"
+            "fileVersion": "7.0.1.26114"
           },
           "runtimes/win/lib/net8.0/Microsoft.Data.SqlClient.dll": {
             "rid": "win",
             "assetType": "runtime",
             "assemblyVersion": "7.0.0.0",
-            "fileVersion": "7.0.0.26076"
+            "fileVersion": "7.0.1.26114"
           }
         }
       },
@@ -315,15 +319,34 @@
           }
         }
       },
-      "MimeKit/4.15.1": {
+      "Microsoft.Web.WebView2/1.0.3912.50": {
+        "runtimeTargets": {
+          "runtimes/win-arm64/native/WebView2Loader.dll": {
+            "rid": "win-arm64",
+            "assetType": "native",
+            "fileVersion": "1.0.3912.50"
+          },
+          "runtimes/win-x64/native/WebView2Loader.dll": {
+            "rid": "win-x64",
+            "assetType": "native",
+            "fileVersion": "1.0.3912.50"
+          },
+          "runtimes/win-x86/native/WebView2Loader.dll": {
+            "rid": "win-x86",
+            "assetType": "native",
+            "fileVersion": "1.0.3912.50"
+          }
+        }
+      },
+      "MimeKit/4.16.0": {
         "dependencies": {
           "BouncyCastle.Cryptography": "2.6.2",
           "System.Security.Cryptography.Pkcs": "8.0.1"
         },
         "runtime": {
           "lib/net8.0/MimeKit.dll": {
-            "assemblyVersion": "4.15.0.0",
-            "fileVersion": "4.15.1.0"
+            "assemblyVersion": "4.16.0.0",
+            "fileVersion": "4.16.0.0"
           }
         }
       },
@@ -384,7 +407,31 @@
           }
         }
       },
-      "System.Security.Cryptography.ProtectedData/8.0.0": {}
+      "System.Security.Cryptography.ProtectedData/8.0.0": {},
+      "Microsoft.Web.WebView2.Core/1.0.3912.50": {
+        "runtime": {
+          "Microsoft.Web.WebView2.Core.dll": {
+            "assemblyVersion": "1.0.3912.50",
+            "fileVersion": "1.0.3912.50"
+          }
+        }
+      },
+      "Microsoft.Web.WebView2.WinForms/1.0.3912.50": {
+        "runtime": {
+          "Microsoft.Web.WebView2.WinForms.dll": {
+            "assemblyVersion": "1.0.3912.50",
+            "fileVersion": "1.0.3912.50"
+          }
+        }
+      },
+      "Microsoft.Web.WebView2.Wpf/1.0.3912.50": {
+        "runtime": {
+          "Microsoft.Web.WebView2.Wpf.dll": {
+            "assemblyVersion": "1.0.3912.50",
+            "fileVersion": "1.0.3912.50"
+          }
+        }
+      }
     }
   },
   "libraries": {
@@ -414,12 +461,12 @@
       "path": "hic.system.windows.forms.datavisualization/1.0.1",
       "hashPath": "hic.system.windows.forms.datavisualization.1.0.1.nupkg.sha512"
     },
-    "MailKit/4.15.1": {
+    "MailKit/4.16.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-4mLbqTbH3ctd0NlukHjVQbU3ZnNDuCtB6ttNZDLPZLWMA2Dr31rh/eCSTqOwDojUX8zfDOVaxstMgJTE9PwZNA==",
-      "path": "mailkit/4.15.1",
-      "hashPath": "mailkit.4.15.1.nupkg.sha512"
+      "sha512": "sha512-trJ82DOpAmo8i1jO1vNE+dGn4mPRyeYfy4swRcAGgMJhPoI1Kohf4OFJJf0+YIj4iUxgxPn8W+ht7e7KiYzSjg==",
+      "path": "mailkit/4.16.0",
+      "hashPath": "mailkit.4.16.0.nupkg.sha512"
     },
     "Microsoft.Bcl.Cryptography/8.0.0": {
       "type": "package",
@@ -428,12 +475,12 @@
       "path": "microsoft.bcl.cryptography/8.0.0",
       "hashPath": "microsoft.bcl.cryptography.8.0.0.nupkg.sha512"
     },
-    "Microsoft.Data.SqlClient/7.0.0": {
+    "Microsoft.Data.SqlClient/7.0.1": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-/oolEwtHuDtpLKU8OItOTTxVJalgPtIkcNBwzXJ3YGyrkOAvLYqMtin9Z1jxqryJpds3PjuZBF5iKIYVVYVSvQ==",
-      "path": "microsoft.data.sqlclient/7.0.0",
-      "hashPath": "microsoft.data.sqlclient.7.0.0.nupkg.sha512"
+      "sha512": "sha512-9jZFXAJ2ThNYK7lhj2RhH7klXVNaWSvZpQncq3bPIOjmHBrdjwgeO4c8wucUVxQwFT8rAA13Z2F2jzoYR7ICDw==",
+      "path": "microsoft.data.sqlclient/7.0.1",
+      "hashPath": "microsoft.data.sqlclient.7.0.1.nupkg.sha512"
     },
     "Microsoft.Data.SqlClient.Extensions.Abstractions/1.0.0": {
       "type": "package",
@@ -547,12 +594,19 @@
       "path": "microsoft.sqlserver.server/1.0.0",
       "hashPath": "microsoft.sqlserver.server.1.0.0.nupkg.sha512"
     },
-    "MimeKit/4.15.1": {
+    "Microsoft.Web.WebView2/1.0.3912.50": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-cxCcQhD0zhboFoG136jJuJtQjNRDJ+BxBm3f2vWn+53bff/CRo+K1mAkWjsW4Wuyy5O22F40MdMG2nRzQu1cJw==",
-      "path": "mimekit/4.15.1",
-      "hashPath": "mimekit.4.15.1.nupkg.sha512"
+      "sha512": "sha512-mEIKZDSmb6CxGWKoxaxTSJ0yi0DD2zp29TA7kJY2GdanuH3c5aYruwfqsm3OsYn/h2hUhybQZvfbxyZe4O+X4Q==",
+      "path": "microsoft.web.webview2/1.0.3912.50",
+      "hashPath": "microsoft.web.webview2.1.0.3912.50.nupkg.sha512"
+    },
+    "MimeKit/4.16.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-X0LFxeM4gPRIhODyY/HYS9b+zRZ7y//v59rFzgS6wLxcPuZThnMtNZHtrr0fjLyRRkg3gqJBtvW36XfUzZ7Djw==",
+      "path": "mimekit/4.16.0",
+      "hashPath": "mimekit.4.16.0.nupkg.sha512"
     },
     "System.Configuration.ConfigurationManager/8.0.1": {
       "type": "package",
@@ -595,6 +649,21 @@
       "sha512": "sha512-+TUFINV2q2ifyXauQXRwy4CiBhqvDEDZeVJU7qfxya4aRYOKzVBpN+4acx25VcPB9ywUN6C0n8drWl110PhZEg==",
       "path": "system.security.cryptography.protecteddata/8.0.0",
       "hashPath": "system.security.cryptography.protecteddata.8.0.0.nupkg.sha512"
+    },
+    "Microsoft.Web.WebView2.Core/1.0.3912.50": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Microsoft.Web.WebView2.WinForms/1.0.3912.50": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Microsoft.Web.WebView2.Wpf/1.0.3912.50": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
     }
   }
 }

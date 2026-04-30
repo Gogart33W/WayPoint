@@ -13,8 +13,12 @@
         "packagesPath": "C:\\Users\\gogar\\.nuget\\packages\\",
         "outputPath": "E:\\recov\\Study\\Kyrop\\WayPoint\\WayPoint\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
           "C:\\Users\\gogar\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -56,11 +60,15 @@
             },
             "MailKit": {
               "target": "Package",
-              "version": "[4.15.1, )"
+              "version": "[4.16.0, )"
             },
             "Microsoft.Data.SqlClient": {
               "target": "Package",
-              "version": "[7.0.0, )"
+              "version": "[7.0.1, )"
+            },
+            "Microsoft.Web.WebView2": {
+              "target": "Package",
+              "version": "[1.0.3912.50, )"
             }
           },
           "imports": [

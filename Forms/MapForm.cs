@@ -1,253 +1,213 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
-using System.Net;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using Microsoft.Web.WebView2.Core;
 
 namespace WayPoint
 {
     public partial class MapForm : Form
     {
-        public string SelectedCountry { get; private set; }
+        public string SelectedCity { get; private set; } = "";
+        public string SelectedCountry { get; private set; } = "";
 
-        private float zoom = 1.4f;
-        private float offsetX = 0f;
-        private float offsetY = 50f;
-        private bool isPanning = false;
-        private Point lastMousePosition;
+        private string initialQuery = "";
+        private Microsoft.Web.WebView2.WinForms.WebView2 webView;
+        private Panel pnlHeader;
+        private Label lblTitle;
+        private System.Windows.Forms.Button btnClose;
 
-        private Image hdMapImage;
-        private string mapFilePath;
+        private bool dragging = false;
+        private Point dragCursorPoint;
+        private Point dragFormPoint;
 
-        private const float BASE_MAP_W = 1000f;
-        private const float BASE_MAP_H = 452f;
-
-        private class CountryMarker
-        {
-            public string Name { get; set; }
-            public float MapX { get; set; }
-            public float MapY { get; set; }
-            public bool IsHovered { get; set; }
-        }
-
-        private List<CountryMarker> markers = new List<CountryMarker>();
-
-        public MapForm()
+        public MapForm(string query)
         {
             InitializeComponent();
+            initialQuery = query;
+            SetupUI();
 
-            // Налаштування форми
-            this.Size = new Size(1000, 650);
-            this.StartPosition = FormStartPosition.CenterParent;
-            this.FormBorderStyle = FormBorderStyle.None;
-            this.BackColor = Color.FromArgb(8, 12, 18);
-            this.DoubleBuffered = true;
-
-            // Шлях до карти
-            mapFilePath = Path.Combine(Application.StartupPath, "world_map_hd.png");
-            LoadOrDownloadMapAsync();
-
-            // Хардкодимо маркери країн
-            markers.Add(new CountryMarker { Name = "Канада", MapX = 259f, MapY = 101f });
-            markers.Add(new CountryMarker { Name = "США", MapX = 262f, MapY = 117f });
-            markers.Add(new CountryMarker { Name = "Мексика", MapX = 189f, MapY = 156f });
-            markers.Add(new CountryMarker { Name = "Бразилія", MapX = 335f, MapY = 274f });
-            markers.Add(new CountryMarker { Name = "Британія", MapX = 470f, MapY = 85f });
-            markers.Add(new CountryMarker { Name = "Франція", MapX = 477f, MapY = 96f });
-            markers.Add(new CountryMarker { Name = "Німеччина", MapX = 506f, MapY = 87f });
-            markers.Add(new CountryMarker { Name = "Україна", MapX = 556f, MapY = 89f });
-            markers.Add(new CountryMarker { Name = "Італія", MapX = 504f, MapY = 109f });
-            markers.Add(new CountryMarker { Name = "Єгипет", MapX = 556f, MapY = 144f });
-            markers.Add(new CountryMarker { Name = "ПАР", MapX = 529f, MapY = 309f });
-            markers.Add(new CountryMarker { Name = "Індія", MapX = 684f, MapY = 155f });
-            markers.Add(new CountryMarker { Name = "Китай", MapX = 797f, MapY = 140f });
-            markers.Add(new CountryMarker { Name = "Японія", MapX = 855f, MapY = 124f });
-            markers.Add(new CountryMarker { Name = "Австралія", MapX = 874f, MapY = 310f });
-
-            // Підписка на події миші
-            this.MouseWheel += Map_MouseWheel;
-            this.MouseDown += Map_MouseDown;
-            this.MouseMove += Map_MouseMove;
-            this.MouseUp += Map_MouseUp;
-            this.MouseClick += Map_MouseClick;
+            webView.CoreWebView2InitializationCompleted += WebView_InitializationCompleted;
+            StartWebViewAsync();
         }
 
         private void MapForm_Load(object sender, EventArgs e)
         {
         }
 
-        private async void LoadOrDownloadMapAsync()
+        private void SetupUI()
         {
-            if (!File.Exists(mapFilePath))
-            {
-                try
-                {
-                    string url = "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/World_map_blank_without_borders.svg/1000px-World_map_blank_without_borders.svg.png";
-                    await Task.Run(() =>
-                    {
-                        using (WebClient client = new WebClient())
-                        {
-                            client.Headers.Add("User-Agent", "Mozilla/5.0");
-                            client.DownloadFile(url, mapFilePath);
-                        }
-                    });
-                }
-                catch { }
-            }
+            this.Size = new Size(1100, 750);
+            this.FormBorderStyle = FormBorderStyle.None;
+            this.StartPosition = FormStartPosition.CenterParent;
+            this.BackColor = Color.White;
 
-            if (File.Exists(mapFilePath))
+            pnlHeader = new Panel { Dock = DockStyle.Top, Height = 55, BackColor = Color.FromArgb(31, 41, 55) };
+
+            lblTitle = new Label
             {
-                hdMapImage = Image.FromFile(mapFilePath);
-                ClampCamera();
-                this.Invalidate();
+                Text = "⏳ Завантаження карти...",
+                ForeColor = Color.White,
+                Font = new Font("Segoe UI", 12, FontStyle.Bold),
+                AutoSize = true,
+                Location = new Point(60, 15)
+            };
+
+            btnClose = new System.Windows.Forms.Button
+            {
+                Text = "← Повернутися",
+                ForeColor = Color.White,
+                BackColor = Color.FromArgb(55, 65, 81),
+                FlatStyle = FlatStyle.Flat,
+                Size = new Size(140, 35),
+                Location = new Point(940, 10),
+                Cursor = Cursors.Hand,
+                Font = new Font("Segoe UI", 9, FontStyle.Bold)
+            };
+            btnClose.FlatAppearance.BorderSize = 0;
+            btnClose.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnClose.Click += (s, e) => { this.DialogResult = DialogResult.Cancel; this.Close(); };
+
+            Label lblBackIcon = new Label { Text = "🔙", Font = new Font("Segoe UI Emoji", 14), ForeColor = Color.White, Location = new Point(15, 12), AutoSize = true, Cursor = Cursors.Hand };
+            lblBackIcon.Click += (s, e) => this.Close();
+
+            pnlHeader.MouseDown += (s, e) => { dragging = true; dragCursorPoint = Cursor.Position; dragFormPoint = this.Location; };
+            pnlHeader.MouseMove += (s, e) => { if (dragging) { this.Location = Point.Add(dragFormPoint, new Size(Point.Subtract(Cursor.Position, new Size(dragCursorPoint)))); } };
+            pnlHeader.MouseUp += (s, e) => dragging = false;
+
+            pnlHeader.Controls.Add(lblBackIcon);
+            pnlHeader.Controls.Add(lblTitle);
+            pnlHeader.Controls.Add(btnClose);
+            this.Controls.Add(pnlHeader);
+
+            webView = new Microsoft.Web.WebView2.WinForms.WebView2 { Dock = DockStyle.Fill };
+            this.Controls.Add(webView);
+            webView.BringToFront();
+        }
+
+        private async void StartWebViewAsync()
+        {
+            try
+            {
+                string userDataFolder = Path.Combine(Path.GetTempPath(), "WayPointMapCache");
+                // Додаємо власне ім'я програми (User-Agent), щоб сервери нас поважали
+                var envOptions = new CoreWebView2EnvironmentOptions("--disable-web-security --user-agent=\"WayPoint_CRM/1.0\"");
+                var env = await CoreWebView2Environment.CreateAsync(null, userDataFolder, envOptions);
+
+                await webView.EnsureCoreWebView2Async(env);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Критична помилка браузера: " + ex.Message);
             }
         }
 
-        private void Map_MouseClick(object sender, MouseEventArgs e)
+        private void WebView_InitializationCompleted(object sender, CoreWebView2InitializationCompletedEventArgs e)
         {
-            // Клік по кнопці "X" (Закрити)
-            if (e.X >= this.Width - 45 && e.X <= this.Width - 10 && e.Y >= 10 && e.Y <= 40)
+            if (!e.IsSuccess)
             {
-                this.Close();
+                MessageBox.Show("Помилка завантаження WebView2: " + e.InitializationException?.Message);
                 return;
             }
 
-            // Клік по маркеру
-            foreach (var m in markers)
+            lblTitle.Text = "🌍 Оберіть локацію (Клікніть по міссту на карті)";
+
+            string[] htmlLines = new string[]
             {
-                if (m.IsHovered)
+                "<!DOCTYPE html>",
+                "<html>",
+                "<head>",
+                "    <meta charset='utf-8' />",
+                "    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css' />",
+                "    <script src='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js'></script>",
+                "    <style>body, html, #map { height: 100%; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }</style>",
+                "</head>",
+                "<body>",
+                "    <div id='map'></div>",
+                "    <script>",
+                "        var map = L.map('map').setView([48.3794, 31.1656], 5); ",
+                
+                // ПРОБЛЕМА 2 ВИРІШЕНА: Сучасні тайли CartoDB Voyager без помилок 403
+                "        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {",
+                "            attribution: '&copy; OpenStreetMap &copy; CARTO'",
+                "        }).addTo(map);",
+
+                "        var marker;",
+                "        var currentPolygon;", // Змінна для зберігання кордонів країни
+                "        var apiParam = '&email=admin@waypoint.com';",
+                "        var initialQuery = 'QUERY_PLACEHOLDER';",
+
+                "        if(initialQuery && initialQuery.length > 2) {",
+                // ПРОБЛЕМА 1 ВИРІШЕНА: Додано параметр polygon_geojson=1 для отримання меж
+                "            fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(initialQuery) + '&polygon_geojson=1&limit=1' + apiParam)",
+                "            .then(res => res.json())",
+                "            .then(data => {",
+                "                if(data.length > 0) {",
+                "                    var place = data[0];",
+                "                    var lat = place.lat; var lon = place.lon;",
+                "                    if (place.geojson) {",
+                // Малюємо красиву обводку кордонів країни
+                "                        currentPolygon = L.geoJSON(place.geojson, {",
+                "                            style: { color: '#3b82f6', weight: 2, fillOpacity: 0.1 }",
+                "                        }).addTo(map);",
+                // Автоматично наближаємо камеру так, щоб вся країна влізла в екран
+                "                        map.fitBounds(currentPolygon.getBounds());",
+                "                    } else {",
+                "                        map.setView([lat, lon], 12);",
+                "                    }",
+                "                    marker = L.marker([lat, lon]).addTo(map);",
+                "                }",
+                "            });",
+                "        }",
+
+                "        map.on('click', function(e) {",
+                "            if(marker) map.removeLayer(marker);",
+                "            if(currentPolygon) map.removeLayer(currentPolygon);",
+                "            marker = L.marker([e.latlng.lat, e.latlng.lng]).addTo(map);",
+
+                "            fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + e.latlng.lat + '&lon=' + e.latlng.lng + '&zoom=18&addressdetails=1' + apiParam)",
+                "            .then(res => res.json())",
+                "            .then(data => {",
+                "                var a = data.address;",
+                "                var city = a.city || a.town || a.village || a.suburb || a.hamlet || a.municipality || 'Невідоме місто';",
+                "                var country = a.country || '';",
+
+                "                var cleanCity = city.replace(/'/g, \"\\\\'\");",
+                "                var cleanCountry = country.replace(/'/g, \"\\\\'\");",
+
+                "                var popupContent = `<div style='text-align:center;'>` +",
+                "                                   `<b style='font-size:15px; color:#1f2937;'>${city}</b><br>` +",
+                "                                   `<span style='color:#6b7280;'>${country}</span><br>` +",
+                "                                   `<button onclick=\"sendToCSharp('${cleanCity}', '${cleanCountry}')\" ` +",
+                "                                   `style='margin-top:12px; width:100%; padding:8px; background:#10b981; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold;'>` +",
+                "                                   `✅ Обрати локацію</button></div>`;",
+                "                marker.bindPopup(popupContent).openPopup();",
+                "            });",
+                "        });",
+
+                "        function sendToCSharp(city, country) {",
+                "            window.chrome.webview.postMessage(city + '|' + country);",
+                "        }",
+                "    </script>",
+                "</body>",
+                "</html>"
+            };
+
+            string html = string.Join("\n", htmlLines);
+            html = html.Replace("QUERY_PLACEHOLDER", initialQuery.Replace("'", "\\'"));
+
+            webView.NavigateToString(html);
+
+            webView.WebMessageReceived += (s, args) => {
+                string[] res = args.TryGetWebMessageAsString().Split('|');
+                if (res.Length == 2)
                 {
-                    SelectedCountry = m.Name;
+                    SelectedCity = res[0];
+                    SelectedCountry = res[1];
                     this.DialogResult = DialogResult.OK;
                     this.Close();
-                    return;
                 }
-            }
-        }
-
-        private void ClampCamera()
-        {
-            float mapH = BASE_MAP_H * zoom;
-            float minY = this.Height - mapH;
-            if (offsetY > 50) offsetY = 50;
-            if (offsetY < minY) offsetY = minY;
-
-            float mapW = BASE_MAP_W * zoom;
-            offsetX = offsetX % mapW;
-            if (offsetX > 0) offsetX -= mapW;
-        }
-
-        private void Map_MouseWheel(object sender, MouseEventArgs e)
-        {
-            float factor = e.Delta > 0 ? 1.1f : 0.9f;
-            float newZoom = zoom * factor;
-            if (newZoom < (this.Height - 50) / BASE_MAP_H) return;
-            if (newZoom > 10f) return;
-
-            offsetX = e.X - (e.X - offsetX) * (newZoom / zoom);
-            offsetY = e.Y - (e.Y - offsetY) * (newZoom / zoom);
-            zoom = newZoom;
-            ClampCamera();
-            this.Invalidate();
-        }
-
-        private void Map_MouseDown(object sender, MouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Left && e.Y > 50)
-            {
-                isPanning = true;
-                lastMousePosition = e.Location;
-                this.Cursor = Cursors.Hand;
-            }
-        }
-
-        private void Map_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (isPanning)
-            {
-                offsetX += (e.X - lastMousePosition.X);
-                offsetY += (e.Y - lastMousePosition.Y);
-                lastMousePosition = e.Location;
-                ClampCamera();
-                this.Invalidate();
-            }
-
-            float mapW = BASE_MAP_W * zoom;
-            bool changed = false;
-            foreach (var m in markers)
-            {
-                float sx = (m.MapX * zoom) + offsetX;
-                float sy = (m.MapY * zoom) + offsetY;
-                bool h = IsHit(e.Location, sx, sy) || IsHit(e.Location, sx + mapW, sy);
-                if (m.IsHovered != h) { m.IsHovered = h; changed = true; }
-            }
-            if (changed) this.Invalidate();
-        }
-
-        private bool IsHit(Point m, float x, float y) => (m.X - x) * (m.X - x) + (m.Y - y) * (m.Y - y) < 225;
-
-        private void Map_MouseUp(object sender, MouseEventArgs e)
-        {
-            isPanning = false;
-            this.Cursor = Cursors.Default;
-        }
-
-        protected override void OnPaint(PaintEventArgs e)
-        {
-            Graphics g = e.Graphics;
-            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-
-            float mapW = BASE_MAP_W * zoom;
-            float mapH = BASE_MAP_H * zoom;
-
-            if (hdMapImage != null)
-            {
-                ImageAttributes ia = new ImageAttributes();
-                ColorMatrix cm = new ColorMatrix(new float[][] {
-                    new float[] { 0, 0, 0, 0, 0 },
-                    new float[] { 0, 1, 0, 0, 0 },
-                    new float[] { 0, 0, 1, 0, 0 },
-                    new float[] { 0, 0, 0, 0.6f, 0 },
-                    new float[] { 0, 0.4f, 0.7f, 0, 1 }
-                });
-                ia.SetColorMatrix(cm);
-                g.DrawImage(hdMapImage, new Rectangle((int)offsetX, (int)offsetY, (int)mapW, (int)mapH), 0, 0, hdMapImage.Width, hdMapImage.Height, GraphicsUnit.Pixel, ia);
-                g.DrawImage(hdMapImage, new Rectangle((int)(offsetX + mapW), (int)offsetY, (int)mapW, (int)mapH), 0, 0, hdMapImage.Width, hdMapImage.Height, GraphicsUnit.Pixel, ia);
-            }
-
-            Font f = new Font("Segoe UI", 9f, FontStyle.Bold);
-            foreach (var m in markers)
-            {
-                float sx = (m.MapX * zoom) + offsetX;
-                float sy = (m.MapY * zoom) + offsetY;
-                DrawMarker(g, m, sx, sy, f);
-                DrawMarker(g, m, sx + mapW, sy, f);
-            }
-
-            g.FillRectangle(new SolidBrush(Color.FromArgb(250, 8, 12, 18)), 0, 0, this.Width, 50);
-            g.DrawLine(new Pen(Color.Cyan, 2), 0, 50, this.Width, 50);
-            g.DrawString("СИСТЕМА ГЛОБАЛЬНОЇ НАВІГАЦІЇ", new Font("Consolas", 14, FontStyle.Bold), Brushes.Cyan, 20, 15);
-
-            g.FillRectangle(Brushes.Crimson, this.Width - 45, 10, 35, 30);
-            g.DrawString("X", f, Brushes.White, this.Width - 33, 16);
-        }
-
-        private void DrawMarker(Graphics g, CountryMarker m, float x, float y, Font font)
-        {
-            if (m.IsHovered)
-            {
-                g.FillEllipse(new SolidBrush(Color.FromArgb(120, 0, 255, 255)), x - 12, y - 12, 24, 24);
-                g.FillEllipse(Brushes.White, x - 5, y - 5, 10, 10);
-                g.DrawString(m.Name, font, Brushes.Cyan, x + 15, y - 7);
-            }
-            else
-            {
-                g.FillEllipse(Brushes.Cyan, x - 3, y - 3, 6, 6);
-                g.DrawString(m.Name, font, new SolidBrush(Color.FromArgb(180, 0, 255, 255)), x + 8, y - 7);
-            }
+            };
         }
     }
 }

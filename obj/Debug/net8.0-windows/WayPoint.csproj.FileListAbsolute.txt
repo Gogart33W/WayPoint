@@ -109,3 +109,13 @@ E:\recov\Study\Kyrop\WayPoint\WayPoint\bin\Debug\net8.0-windows\BouncyCastle.Cry
 E:\recov\Study\Kyrop\WayPoint\WayPoint\bin\Debug\net8.0-windows\MailKit.dll
 E:\recov\Study\Kyrop\WayPoint\WayPoint\bin\Debug\net8.0-windows\MimeKit.dll
 E:\recov\Study\Kyrop\WayPoint\WayPoint\obj\Debug\net8.0-windows\WayPoint.AdminUsersForm.resources
+E:\recov\Study\Kyrop\WayPoint\WayPoint\obj\Debug\net8.0-windows\WayPoint.sourcelink.json
+E:\recov\Study\Kyrop\WayPoint\WayPoint\bin\Debug\net8.0-windows\runtimes\win-x86\native\WebView2Loader.dll
+E:\recov\Study\Kyrop\WayPoint\WayPoint\bin\Debug\net8.0-windows\runtimes\win-x64\native\WebView2Loader.dll
+E:\recov\Study\Kyrop\WayPoint\WayPoint\bin\Debug\net8.0-windows\runtimes\win-arm64\native\WebView2Loader.dll
+E:\recov\Study\Kyrop\WayPoint\WayPoint\bin\Debug\net8.0-windows\Microsoft.Web.WebView2.Core.dll
+E:\recov\Study\Kyrop\WayPoint\WayPoint\bin\Debug\net8.0-windows\Microsoft.Web.WebView2.WinForms.dll
+E:\recov\Study\Kyrop\WayPoint\WayPoint\bin\Debug\net8.0-windows\Microsoft.Web.WebView2.Wpf.dll
+E:\recov\Study\Kyrop\WayPoint\WayPoint\bin\Debug\net8.0-windows\Microsoft.Web.WebView2.Core.xml
+E:\recov\Study\Kyrop\WayPoint\WayPoint\bin\Debug\net8.0-windows\Microsoft.Web.WebView2.WinForms.xml
+E:\recov\Study\Kyrop\WayPoint\WayPoint\bin\Debug\net8.0-windows\Microsoft.Web.WebView2.Wpf.xml

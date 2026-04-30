@@ -2,7 +2,6 @@
 using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
-using System.Windows.Forms.DataVisualization.Charting;
 using Microsoft.Data.SqlClient;
 using WayPoint.Services;
 
@@ -25,7 +24,17 @@ namespace WayPoint
         private void MainWork_Load(object sender, EventArgs e)
         {
             lblTitle.Text = $"WayPoint | База турів | {Session.Username} ({Session.Role})";
+
+            // МАГІЯ: Показуємо кнопку повернення тільки якщо це Адмін!
+            btnAdminReturn.Visible = (Session.Role == "Admin");
+
             LoadDataFromDatabase();
+        }
+
+        // Обробник нової кнопки!
+        private void btnAdminReturn_Click(object sender, EventArgs e)
+        {
+            this.Close(); // Поверне нас на форму управління користувачами
         }
 
         private void SetupDataTableStructure()
@@ -47,6 +56,19 @@ namespace WayPoint
                 dgvData.Columns["ID"].Visible = false;
                 dgvData.Columns["ID"].ReadOnly = true;
             }
+
+            dgvData.EnableHeadersVisualStyles = false;
+            dgvData.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
+            dgvData.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(243, 244, 246);
+            dgvData.ColumnHeadersDefaultCellStyle.ForeColor = Color.DimGray;
+            dgvData.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            dgvData.ColumnHeadersHeight = 40;
+
+            dgvData.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
+            dgvData.DefaultCellStyle.SelectionBackColor = Color.FromArgb(219, 234, 254);
+            dgvData.DefaultCellStyle.SelectionForeColor = Color.Black;
+            dgvData.DefaultCellStyle.Font = new Font("Segoe UI", 10F);
+            dgvData.RowTemplate.Height = 35;
 
             dgvData.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dgvData.MultiSelect = false;
@@ -88,7 +110,6 @@ namespace WayPoint
                         }
                     }
                 }
-                SetupChart();
 
                 dgvData.CellValueChanged += DgvData_CellValueChanged;
             }
@@ -115,27 +136,25 @@ namespace WayPoint
                 {
                     string sql = $"UPDATE Travels SET [{columnName}] = @val WHERE ID = @id";
                     SqlCommand cmd = new SqlCommand(sql, connection);
-
                     cmd.Parameters.AddWithValue("@val", newValue ?? DBNull.Value);
                     cmd.Parameters.AddWithValue("@id", id);
                     cmd.ExecuteNonQuery();
                 }
-
-                if (columnName == "City" || columnName == "Budget")
-                {
-                    SetupChart();
-                }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Помилка оновлення поля '{columnName}': {ex.Message}", "Помилка SQL", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Помилка оновлення поля '{columnName}': {ex.Message}");
                 LoadDataFromDatabase();
             }
         }
 
         private void btnAdd_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtCountry.Text) || string.IsNullOrWhiteSpace(txtCity.Text)) return;
+            if (string.IsNullOrWhiteSpace(txtCountry.Text) || string.IsNullOrWhiteSpace(txtCity.Text))
+            {
+                MessageBox.Show("Будь ласка, вкажіть країну та місто.", "Увага", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
 
             try
             {
@@ -145,7 +164,6 @@ namespace WayPoint
                     SqlCommand cmd = new SqlCommand(sql, connection);
 
                     string selectedUser = cmbAssignedUser.SelectedItem != null ? cmbAssignedUser.SelectedItem.ToString() : Session.Username;
-
                     cmd.Parameters.AddWithValue("@u", selectedUser);
                     cmd.Parameters.AddWithValue("@co", txtCountry.Text);
                     cmd.Parameters.AddWithValue("@ci", txtCity.Text);
@@ -154,6 +172,7 @@ namespace WayPoint
                     cmd.ExecuteNonQuery();
                 }
                 LoadDataFromDatabase();
+                btnClear_Click(null, null);
             }
             catch (Exception ex) { MessageBox.Show("Помилка: " + ex.Message); }
         }
@@ -161,7 +180,6 @@ namespace WayPoint
         private void btnEdit_Click(object sender, EventArgs e)
         {
             if (dgvData.SelectedRows.Count == 0) return;
-
             int id = (int)dgvData.SelectedRows[0].Cells["ID"].Value;
             try
             {
@@ -169,7 +187,6 @@ namespace WayPoint
                 {
                     string sql = "UPDATE Travels SET [User]=@u, Country=@co, City=@ci, Budget=@b, [Status]=@s WHERE ID=@id";
                     SqlCommand cmd = new SqlCommand(sql, connection);
-
                     string selectedUser = cmbAssignedUser.SelectedItem != null ? cmbAssignedUser.SelectedItem.ToString() : Session.Username;
 
                     cmd.Parameters.AddWithValue("@u", selectedUser);
@@ -210,6 +227,21 @@ namespace WayPoint
             txtCity.Clear();
             numBudget.Value = 0;
             if (cmbAssignedUser.Items.Count > 0) cmbAssignedUser.SelectedIndex = 0;
+            dgvData.ClearSelection();
+        }
+
+        private void btnOpenMap_Click(object sender, EventArgs e)
+        {
+            string query = $"{txtCity.Text} {txtCountry.Text}".Trim();
+
+            using (MapForm mapForm = new MapForm(query))
+            {
+                if (mapForm.ShowDialog() == DialogResult.OK)
+                {
+                    txtCity.Text = mapForm.SelectedCity;
+                    txtCountry.Text = mapForm.SelectedCountry;
+                }
+            }
         }
 
         private void btnOpenFeed_Click(object sender, EventArgs e)
@@ -221,45 +253,8 @@ namespace WayPoint
             LoadDataFromDatabase();
         }
 
-        private void btnExportXML_Click(object sender, EventArgs e) => MessageBox.Show("Дані зберігаються в MS SQL Server.");
-        private void btnImportXML_Click(object sender, EventArgs e) => LoadDataFromDatabase();
-
         private void pbBack_Click(object sender, EventArgs e) => this.Close();
         private void pbExit_Click(object sender, EventArgs e) => Application.Exit();
-
-        private void SetupChart()
-        {
-            // ФІКС: Якщо графіка немає на формі, створюємо його кодом
-            if (chartTravel == null)
-            {
-                chartTravel = new Chart();
-                chartTravel.Size = new Size(300, 200);
-                chartTravel.Location = new Point(660, 450); // Приблизна позиція справа знизу
-
-                ChartArea chartArea = new ChartArea("MainArea");
-                chartTravel.ChartAreas.Add(chartArea);
-                this.Controls.Add(chartTravel);
-                chartTravel.BringToFront();
-            }
-
-            if (travelTable.Rows.Count == 0)
-            {
-                chartTravel.Series.Clear();
-                return;
-            }
-
-            chartTravel.Series.Clear();
-            var s = new Series("Бюджет")
-            {
-                ChartType = SeriesChartType.Column,
-                XValueMember = "City",
-                YValueMembers = "Budget",
-                Color = Color.DodgerBlue
-            };
-            chartTravel.Series.Add(s);
-            chartTravel.DataSource = travelTable;
-            chartTravel.DataBind();
-        }
 
         private void DgvData_SelectionChanged(object sender, EventArgs e)
         {
@@ -289,13 +284,12 @@ namespace WayPoint
             foreach (DataGridViewRow row in dgvData.Rows)
             {
                 string status = row.Cells["Status"].Value?.ToString() ?? "";
-                if (status == "Запит") row.DefaultCellStyle.BackColor = Color.LightGoldenrodYellow;
-                else if (status == "Очікує перевірки") row.DefaultCellStyle.BackColor = Color.LightCyan;
-                else if (status == "Завершено") row.DefaultCellStyle.BackColor = Color.Honeydew;
+                if (status == "Запит") row.DefaultCellStyle.BackColor = Color.FromArgb(254, 243, 199);
+                else if (status == "Очікує перевірки") row.DefaultCellStyle.BackColor = Color.FromArgb(254, 226, 226);
+                else if (status == "Завершено") row.DefaultCellStyle.BackColor = Color.FromArgb(209, 250, 229);
             }
         }
 
-        // ФІКС: Повні шляхи до класу Cursor
         private void pnlHeader_MouseDown(object sender, MouseEventArgs e) { dragging = true; dragCursorPoint = System.Windows.Forms.Cursor.Position; dragFormPoint = this.Location; }
         private void pnlHeader_MouseMove(object sender, MouseEventArgs e) { if (dragging) { Point dif = Point.Subtract(System.Windows.Forms.Cursor.Position, new Size(dragCursorPoint)); this.Location = Point.Add(dragFormPoint, new Size(dif)); } }
         private void pnlHeader_MouseUp(object sender, MouseEventArgs e) => dragging = false;

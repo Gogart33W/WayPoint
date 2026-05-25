@@ -46,6 +46,9 @@ namespace WayPoint
             this.dgvData = new System.Windows.Forms.DataGridView();
             this.lblDataTitle = new System.Windows.Forms.Label();
 
+            // ОГОЛОШЕННЯ НОВОГО ПОЛЯ ГОТЕЛЮ
+            this.txtHotel = new System.Windows.Forms.TextBox();
+
             this.pnlHeader.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pbBack)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pbExit)).BeginInit();
@@ -58,7 +61,7 @@ namespace WayPoint
             ((System.ComponentModel.ISupportInitialize)(this.dgvData)).BeginInit();
             this.SuspendLayout();
 
-            // HEADER
+            // ===== HEADER =====
             this.pnlHeader.BackColor = Color.FromArgb(31, 41, 55);
             this.pnlHeader.Controls.Add(this.btnAdminReturn);
             this.pnlHeader.Controls.Add(this.btnOpenFeed);
@@ -102,7 +105,7 @@ namespace WayPoint
             this.pbExit.SizeMode = PictureBoxSizeMode.Zoom;
             this.pbExit.Click += (s, e) => Application.Exit();
 
-            // SIDEBAR
+            // ===== SIDEBAR =====
             this.pnlSidebar.BackColor = Color.White;
             this.pnlSidebar.Location = new Point(20, 80);
             this.pnlSidebar.Size = new Size(320, 580);
@@ -113,90 +116,237 @@ namespace WayPoint
             this.lblSidebarTitle.Location = new Point(20, 10);
             this.lblSidebarTitle.AutoSize = true;
 
+            // Країна + Місто
             AddLabel("Куди (Країна)", 45, 20);
-            txtCountry.Location = new Point(20, 65); txtCountry.Size = new Size(130, 30); txtCountry.Font = new Font("Segoe UI", 10F);
+            this.txtCountry.Location = new Point(20, 65);
+            this.txtCountry.Size = new Size(130, 30);
+            this.txtCountry.Font = new Font("Segoe UI", 10F);
 
             AddLabel("Місто", 45, 160);
-            txtCity.Location = new Point(160, 65); txtCity.Size = new Size(100, 30); txtCity.Font = new Font("Segoe UI", 10F);
+            this.txtCity.Location = new Point(160, 65);
+            this.txtCity.Size = new Size(100, 30);
+            this.txtCity.Font = new Font("Segoe UI", 10F);
 
-            btnOpenMap.Location = new Point(265, 64); btnOpenMap.Size = new Size(35, 32); btnOpenMap.Text = "🌍";
-            btnOpenMap.BackColor = Color.FromArgb(243, 244, 246); btnOpenMap.FlatStyle = FlatStyle.Flat; btnOpenMap.FlatAppearance.BorderSize = 0;
-            btnOpenMap.Click += new EventHandler(this.btnOpenMap_Click);
+            this.btnOpenMap.Location = new Point(265, 64);
+            this.btnOpenMap.Size = new Size(35, 32);
+            this.btnOpenMap.Text = "🌍";
+            this.btnOpenMap.BackColor = Color.FromArgb(243, 244, 246);
+            this.btnOpenMap.FlatStyle = FlatStyle.Flat;
+            this.btnOpenMap.FlatAppearance.BorderSize = 0;
+            this.btnOpenMap.Click += new EventHandler(this.btnOpenMap_Click);
 
+            // Звідки + Транспорт
             AddLabel("Звідки (Місто)", 100, 20);
-            txtDepartureCity.Location = new Point(20, 120); txtDepartureCity.Size = new Size(130, 30); txtDepartureCity.Text = "Київ"; txtDepartureCity.Font = new Font("Segoe UI", 10F);
+            this.txtDepartureCity.Location = new Point(20, 120);
+            this.txtDepartureCity.Size = new Size(130, 30);
+            this.txtDepartureCity.Text = "Київ";
+            this.txtDepartureCity.Font = new Font("Segoe UI", 10F);
 
             AddLabel("Транспорт", 100, 160);
-            cmbTransport.Items.AddRange(new object[] { "Літак (Прямий)", "Літак (Пересадка)", "Автобус", "Потяг" });
-            cmbTransport.Location = new Point(160, 120); cmbTransport.Size = new Size(140, 30); cmbTransport.DropDownStyle = ComboBoxStyle.DropDownList; cmbTransport.SelectedIndex = 0; cmbTransport.Font = new Font("Segoe UI", 10F);
+            this.cmbTransport.Items.AddRange(new object[] { "Літак (Прямий)", "Літак (Пересадка)", "Автобус", "Потяг" });
+            this.cmbTransport.Location = new Point(160, 120);
+            this.cmbTransport.Size = new Size(140, 30);
+            this.cmbTransport.DropDownStyle = ComboBoxStyle.DropDownList;
+            this.cmbTransport.SelectedIndex = 0;
+            this.cmbTransport.Font = new Font("Segoe UI", 10F);
 
+            // ===== ДОРОСЛІ =====
             AddLabel("👥 Дорослі", 155, 20);
-            numAdults.Location = new Point(20, 175); numAdults.Size = new Size(60, 30); numAdults.Value = 2; numAdults.Font = new Font("Segoe UI", 10F);
+            this.numAdults.Location = new Point(20, 175);
+            this.numAdults.Size = new Size(60, 30);
+            this.numAdults.Minimum = 1;
+            this.numAdults.Maximum = 100;
+            this.numAdults.Value = 2;
+            this.numAdults.Font = new Font("Segoe UI", 10F);
 
+            // ===== НОЧІ =====
             AddLabel("🌙 Ночей", 155, 95);
-            numNights.Location = new Point(95, 175); numNights.Size = new Size(60, 30); numNights.Value = 7; numNights.Font = new Font("Segoe UI", 10F);
+            this.numNights.Location = new Point(95, 175);
+            this.numNights.Size = new Size(60, 30);
+            this.numNights.Minimum = 1;
+            this.numNights.Maximum = 365;
+            this.numNights.Value = 7;
+            this.numNights.Font = new Font("Segoe UI", 10F);
 
+            // Харчування
             AddLabel("🍴 Харчування", 155, 170);
-            cmbBoard.Items.AddRange(new object[] { "RO (Без їжі)", "BB (Сніданок)", "HB (Снід.+Веч.)", "FB (3-разове)", "AI (Все вкл.)" });
-            cmbBoard.Location = new Point(170, 175); cmbBoard.Size = new Size(130, 31); cmbBoard.DropDownStyle = ComboBoxStyle.DropDownList; cmbBoard.SelectedIndex = 4; cmbBoard.Font = new Font("Segoe UI", 10F);
+            this.cmbBoard.Items.AddRange(new object[] { "RO (Без їжі)", "BB (Сніданок)", "HB (Снід.+Веч.)", "FB (3-разове)", "AI (Все вкл.)" });
+            this.cmbBoard.Location = new Point(170, 175);
+            this.cmbBoard.Size = new Size(130, 31);
+            this.cmbBoard.DropDownStyle = ComboBoxStyle.DropDownList;
+            this.cmbBoard.SelectedIndex = 4;
+            this.cmbBoard.Font = new Font("Segoe UI", 10F);
 
+            // ===== РИНКОВА ЦІНА =====
             AddLabel("Ринкова ціна ($)", 215, 20);
-            numMarketPrice.Location = new Point(20, 235); numMarketPrice.Size = new Size(130, 30); numMarketPrice.Maximum = 100000; numMarketPrice.ReadOnly = true; numMarketPrice.BackColor = Color.FromArgb(243, 244, 246); numMarketPrice.Font = new Font("Segoe UI", 10F);
+            this.numMarketPrice.Location = new Point(20, 235);
+            this.numMarketPrice.Size = new Size(130, 30);
+            this.numMarketPrice.Minimum = 0;
+            this.numMarketPrice.Maximum = 1000000;
+            this.numMarketPrice.Value = 0;
+            this.numMarketPrice.ReadOnly = true;
+            this.numMarketPrice.BackColor = Color.FromArgb(243, 244, 246);
+            this.numMarketPrice.Font = new Font("Segoe UI", 10F);
 
+            // Конкурент
             AddLabel("Конкурент (Авто)", 215, 160);
-            txtAgency.Location = new Point(160, 235); txtAgency.Size = new Size(140, 30); txtAgency.ReadOnly = true; txtAgency.BackColor = Color.FromArgb(243, 244, 246); txtAgency.Font = new Font("Segoe UI", 10F);
+            this.txtAgency.Location = new Point(160, 235);
+            this.txtAgency.Size = new Size(140, 30);
+            this.txtAgency.ReadOnly = true;
+            this.txtAgency.BackColor = Color.FromArgb(243, 244, 246);
+            this.txtAgency.Font = new Font("Segoe UI", 10F);
 
-            AddLabel("НАША ЦІНА ($)", 275, 20);
-            numBudget.Location = new Point(20, 295); numBudget.Size = new Size(280, 30); numBudget.Maximum = 100000; numBudget.Font = new Font("Segoe UI", 12, FontStyle.Bold); numBudget.BackColor = Color.FromArgb(220, 252, 231);
+            // ==========================================
+            // ===== НОВИЙ БЛОК: ГОТЕЛЬ (Y = 295) =====
+            // ==========================================
+            AddLabel("🏨 Готель", 275, 20);
+            this.txtHotel.Location = new Point(20, 295);
+            this.txtHotel.Size = new Size(280, 30);
+            this.txtHotel.Font = new Font("Segoe UI", 10F);
+            this.txtHotel.BackColor = Color.FromArgb(239, 246, 255);
+            this.txtHotel.ReadOnly = true;
+            this.txtHotel.Text = "Натисніть для вибору готелю...";
+            this.txtHotel.ForeColor = Color.Gray;
 
-            AddLabel("Статус", 335, 20);
-            cmbStatus.Items.AddRange(new object[] { "Запит", "Планується", "Завершено" });
-            cmbStatus.Location = new Point(20, 355); cmbStatus.Size = new Size(130, 31); cmbStatus.DropDownStyle = ComboBoxStyle.DropDownList; cmbStatus.SelectedIndex = 0; cmbStatus.Font = new Font("Segoe UI", 10F);
+            // ==========================================
+            // ===== ЗСУНУТО ВНИЗ (НАША ЦІНА Y = 355) =====
+            // ==========================================
+            AddLabel("НАША ЦІНА ($)", 335, 20);
+            this.numBudget.Location = new Point(20, 355);
+            this.numBudget.Size = new Size(280, 30);
+            this.numBudget.Minimum = 0;
+            this.numBudget.Maximum = 1000000;
+            this.numBudget.Value = 0;
+            this.numBudget.Font = new Font("Segoe UI", 12, FontStyle.Bold);
+            this.numBudget.BackColor = Color.FromArgb(220, 252, 231);
 
-            AddLabel("Клієнт", 335, 160);
-            cmbAssignedUser.Location = new Point(160, 355); cmbAssignedUser.Size = new Size(140, 31); cmbAssignedUser.DropDownStyle = ComboBoxStyle.DropDownList; cmbAssignedUser.Font = new Font("Segoe UI", 10F);
+            // Статус + Клієнт (Y = 415)
+            AddLabel("Статус", 395, 20);
+            this.cmbStatus.Items.AddRange(new object[] { "Запит", "Планується", "Завершено" });
+            this.cmbStatus.Location = new Point(20, 415);
+            this.cmbStatus.Size = new Size(130, 31);
+            this.cmbStatus.DropDownStyle = ComboBoxStyle.DropDownList;
+            this.cmbStatus.SelectedIndex = 0;
+            this.cmbStatus.Font = new Font("Segoe UI", 10F);
 
-            this.btnAdd.Location = new Point(20, 420); btnAdd.Size = new Size(135, 45); btnAdd.Text = "Додати"; btnAdd.BackColor = Color.FromArgb(16, 185, 129); btnAdd.ForeColor = Color.White; btnAdd.FlatStyle = FlatStyle.Flat; btnAdd.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
-            btnAdd.Click += new EventHandler(this.btnAdd_Click);
+            AddLabel("Клієнт", 395, 160);
+            this.cmbAssignedUser.Location = new Point(160, 415);
+            this.cmbAssignedUser.Size = new Size(140, 31);
+            this.cmbAssignedUser.DropDownStyle = ComboBoxStyle.DropDownList;
+            this.cmbAssignedUser.Font = new Font("Segoe UI", 10F);
 
-            this.btnEdit.Location = new Point(165, 420); btnEdit.Size = new Size(135, 45); btnEdit.Text = "Оновити"; btnEdit.BackColor = Color.FromArgb(245, 158, 11); btnEdit.ForeColor = Color.White; btnEdit.FlatStyle = FlatStyle.Flat; btnEdit.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
-            btnEdit.Click += new EventHandler(this.btnEdit_Click);
+            // Кнопки (Зсунуто на Y = 480 та 535)
+            this.btnAdd.Location = new Point(20, 480);
+            this.btnAdd.Size = new Size(135, 45);
+            this.btnAdd.Text = "Додати";
+            this.btnAdd.BackColor = Color.FromArgb(16, 185, 129);
+            this.btnAdd.ForeColor = Color.White;
+            this.btnAdd.FlatStyle = FlatStyle.Flat;
+            this.btnAdd.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            this.btnAdd.Click += new EventHandler(this.btnAdd_Click);
 
-            this.btnDelete.Location = new Point(20, 475); btnDelete.Size = new Size(135, 45); btnDelete.Text = "Видалити"; btnDelete.BackColor = Color.FromArgb(239, 68, 68); btnDelete.ForeColor = Color.White; btnDelete.FlatStyle = FlatStyle.Flat; btnDelete.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
-            btnDelete.Click += new EventHandler(this.btnDelete_Click);
+            this.btnEdit.Location = new Point(165, 480);
+            this.btnEdit.Size = new Size(135, 45);
+            this.btnEdit.Text = "Оновити";
+            this.btnEdit.BackColor = Color.FromArgb(245, 158, 11);
+            this.btnEdit.ForeColor = Color.White;
+            this.btnEdit.FlatStyle = FlatStyle.Flat;
+            this.btnEdit.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            this.btnEdit.Click += new EventHandler(this.btnEdit_Click);
 
-            this.btnClear.Location = new Point(165, 475); btnClear.Size = new Size(135, 45); btnClear.Text = "Очистити"; btnClear.BackColor = Color.FromArgb(229, 231, 235); btnClear.FlatStyle = FlatStyle.Flat; btnClear.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
-            btnClear.Click += new EventHandler(this.btnClear_Click);
+            this.btnDelete.Location = new Point(20, 535);
+            this.btnDelete.Size = new Size(135, 45);
+            this.btnDelete.Text = "Видалити";
+            this.btnDelete.BackColor = Color.FromArgb(239, 68, 68);
+            this.btnDelete.ForeColor = Color.White;
+            this.btnDelete.FlatStyle = FlatStyle.Flat;
+            this.btnDelete.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            this.btnDelete.Click += new EventHandler(this.btnDelete_Click);
 
-            this.pnlSidebar.Controls.Add(btnAdd); this.pnlSidebar.Controls.Add(btnEdit); this.pnlSidebar.Controls.Add(btnDelete); this.pnlSidebar.Controls.Add(btnClear);
-            this.pnlSidebar.Controls.Add(txtCountry); this.pnlSidebar.Controls.Add(txtCity); this.pnlSidebar.Controls.Add(btnOpenMap);
-            this.pnlSidebar.Controls.Add(txtDepartureCity); this.pnlSidebar.Controls.Add(cmbTransport);
-            this.pnlSidebar.Controls.Add(numAdults); this.pnlSidebar.Controls.Add(numNights); this.pnlSidebar.Controls.Add(cmbBoard);
-            this.pnlSidebar.Controls.Add(numBudget); this.pnlSidebar.Controls.Add(numMarketPrice); this.pnlSidebar.Controls.Add(txtAgency);
-            this.pnlSidebar.Controls.Add(cmbStatus); this.pnlSidebar.Controls.Add(cmbAssignedUser);
+            this.btnClear.Location = new Point(165, 535);
+            this.btnClear.Size = new Size(135, 45);
+            this.btnClear.Text = "Очистити";
+            this.btnClear.BackColor = Color.FromArgb(229, 231, 235);
+            this.btnClear.FlatStyle = FlatStyle.Flat;
+            this.btnClear.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            this.btnClear.Click += new EventHandler(this.btnClear_Click);
 
-            // DATA PANEL
-            this.pnlData.Location = new Point(360, 80); this.pnlData.Size = new Size(700, 580); this.pnlData.BackColor = Color.White; this.pnlData.BorderStyle = BorderStyle.FixedSingle;
-            this.dgvData.Location = new Point(20, 70); this.dgvData.Size = new Size(660, 490); this.dgvData.BackgroundColor = Color.White; this.dgvData.BorderStyle = BorderStyle.None;
-            this.lblDataTitle.Text = "База подорожей"; this.lblDataTitle.Font = new Font("Segoe UI", 14, FontStyle.Bold); this.lblDataTitle.Location = new Point(20, 20);
-            this.pnlData.Controls.Add(lblDataTitle); this.pnlData.Controls.Add(dgvData);
+            // Додаємо контроли на sidebar
+            this.pnlSidebar.Controls.Add(this.lblSidebarTitle);
+            this.pnlSidebar.Controls.Add(this.btnAdd);
+            this.pnlSidebar.Controls.Add(this.btnEdit);
+            this.pnlSidebar.Controls.Add(this.btnDelete);
+            this.pnlSidebar.Controls.Add(this.btnClear);
+            this.pnlSidebar.Controls.Add(this.txtCountry);
+            this.pnlSidebar.Controls.Add(this.txtCity);
+            this.pnlSidebar.Controls.Add(this.btnOpenMap);
+            this.pnlSidebar.Controls.Add(this.txtDepartureCity);
+            this.pnlSidebar.Controls.Add(this.cmbTransport);
+            this.pnlSidebar.Controls.Add(this.numAdults);
+            this.pnlSidebar.Controls.Add(this.numNights);
+            this.pnlSidebar.Controls.Add(this.cmbBoard);
+            this.pnlSidebar.Controls.Add(this.numBudget);
+            this.pnlSidebar.Controls.Add(this.numMarketPrice);
+            this.pnlSidebar.Controls.Add(this.txtAgency);
+            this.pnlSidebar.Controls.Add(this.txtHotel); // <-- ГОТЕЛЬ ДОДАНО НА ПАНЕЛЬ
+            this.pnlSidebar.Controls.Add(this.cmbStatus);
+            this.pnlSidebar.Controls.Add(this.cmbAssignedUser);
 
+            // ===== DATA PANEL =====
+            this.pnlData.Location = new Point(360, 80);
+            this.pnlData.Size = new Size(700, 580);
+            this.pnlData.BackColor = Color.White;
+            this.pnlData.BorderStyle = BorderStyle.FixedSingle;
+
+            this.dgvData.Location = new Point(20, 70);
+            this.dgvData.Size = new Size(660, 490);
+            this.dgvData.BackgroundColor = Color.White;
+            this.dgvData.BorderStyle = BorderStyle.None;
+
+            this.lblDataTitle.Text = "База подорожей";
+            this.lblDataTitle.Font = new Font("Segoe UI", 14, FontStyle.Bold);
+            this.lblDataTitle.Location = new Point(20, 20);
+            this.lblDataTitle.AutoSize = true;
+
+            this.pnlData.Controls.Add(this.lblDataTitle);
+            this.pnlData.Controls.Add(this.dgvData);
+
+            // ===== ФОРМА =====
             this.ClientSize = new Size(1080, 680);
-            this.Controls.Add(pnlHeader); this.Controls.Add(pnlSidebar); this.Controls.Add(pnlData);
+            this.Controls.Add(this.pnlHeader);
+            this.Controls.Add(this.pnlSidebar);
+            this.Controls.Add(this.pnlData);
             this.FormBorderStyle = FormBorderStyle.None;
             this.StartPosition = FormStartPosition.CenterScreen;
             this.Load += new EventHandler(MainWork_Load);
 
-            this.pnlHeader.ResumeLayout(false); this.pnlHeader.PerformLayout();
-            this.pnlSidebar.ResumeLayout(false); this.pnlSidebar.PerformLayout();
-            this.pnlData.ResumeLayout(false); this.pnlData.PerformLayout();
+            // ResumeLayout
+            ((System.ComponentModel.ISupportInitialize)(this.numBudget)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numMarketPrice)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numAdults)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numNights)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgvData)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pbBack)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pbExit)).EndInit();
+            this.pnlHeader.ResumeLayout(false);
+            this.pnlHeader.PerformLayout();
+            this.pnlSidebar.ResumeLayout(false);
+            this.pnlSidebar.PerformLayout();
+            this.pnlData.ResumeLayout(false);
+            this.pnlData.PerformLayout();
             this.ResumeLayout(false);
         }
 
         private void AddLabel(string text, int y, int x = 20)
         {
-            Label lbl = new Label { Text = text, Location = new Point(x, y), AutoSize = true, Font = new Font("Segoe UI", 9, FontStyle.Bold), ForeColor = Color.Gray };
+            Label lbl = new Label
+            {
+                Text = text,
+                Location = new Point(x, y),
+                AutoSize = true,
+                Font = new Font("Segoe UI", 9, FontStyle.Bold),
+                ForeColor = Color.Gray
+            };
             this.pnlSidebar.Controls.Add(lbl);
         }
 
@@ -215,5 +365,6 @@ namespace WayPoint
         private Panel pnlData;
         private DataGridView dgvData;
         private Label lblDataTitle;
+        private TextBox txtHotel; // <-- ОГОЛОШЕННЯ ЗМІННОЇ ГОТЕЛЮ
     }
 }

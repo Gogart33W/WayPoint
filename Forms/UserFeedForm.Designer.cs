@@ -1,4 +1,8 @@
-﻿namespace WayPoint
+﻿using System;
+using System.Drawing;
+using System.Windows.Forms;
+
+namespace WayPoint
 {
     partial class UserFeedForm
     {
@@ -14,167 +18,153 @@
 
         private void InitializeComponent()
         {
-            pnlHeader = new Panel();
-            lblTitle = new Label();
-            pbBack = new PictureBox();
-            pbExit = new PictureBox();
-            tabControlFeed = new TabControl();
-            tabMyTrips = new TabPage();
-            flowMyTrips = new FlowLayoutPanel();
-            tabGlobalFeed = new TabPage();
-            flowGlobalFeed = new FlowLayoutPanel();
-            pnlHeader.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)pbBack).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)pbExit).BeginInit();
-            tabControlFeed.SuspendLayout();
-            tabMyTrips.SuspendLayout();
-            tabGlobalFeed.SuspendLayout();
-            SuspendLayout();
+            this.pnlHeader = new System.Windows.Forms.Panel();
+            this.lblTitle = new System.Windows.Forms.Label();
+            this.lblBack = new System.Windows.Forms.Label();
+            this.lblExit = new System.Windows.Forms.Label();
+            this.tabControlFeed = new System.Windows.Forms.TabControl();
+            this.tabMyTrips = new System.Windows.Forms.TabPage();
+            this.flowMyTrips = new System.Windows.Forms.FlowLayoutPanel();
+            this.tabGlobalFeed = new System.Windows.Forms.TabPage();
+            this.flowGlobalFeed = new System.Windows.Forms.FlowLayoutPanel();
+
+            this.pnlHeader.SuspendLayout();
+            this.tabControlFeed.SuspendLayout();
+            this.tabMyTrips.SuspendLayout();
+            this.tabGlobalFeed.SuspendLayout();
+            this.SuspendLayout();
+
             // 
             // pnlHeader
             // 
-            pnlHeader.BackColor = Color.FromArgb(44, 62, 80);
-            pnlHeader.Controls.Add(lblTitle);
-            pnlHeader.Controls.Add(pbBack);
-            pnlHeader.Controls.Add(pbExit);
-            pnlHeader.Dock = DockStyle.Top;
-            pnlHeader.Location = new Point(0, 0);
-            pnlHeader.Margin = new Padding(3, 4, 3, 4);
-            pnlHeader.Name = "pnlHeader";
-            pnlHeader.Size = new Size(850, 62);
-            pnlHeader.TabIndex = 0;
-            pnlHeader.MouseDown += pnlHeader_MouseDown;
-            pnlHeader.MouseMove += pnlHeader_MouseMove;
-            pnlHeader.MouseUp += pnlHeader_MouseUp;
-            // 
+            this.pnlHeader.BackColor = System.Drawing.Color.FromArgb(44, 62, 80);
+            this.pnlHeader.Controls.Add(this.lblTitle);
+            this.pnlHeader.Controls.Add(this.lblBack);
+            this.pnlHeader.Controls.Add(this.lblExit);
+            this.pnlHeader.Dock = System.Windows.Forms.DockStyle.Top;
+            this.pnlHeader.Location = new System.Drawing.Point(0, 0);
+            this.pnlHeader.Name = "pnlHeader";
+            this.pnlHeader.Size = new System.Drawing.Size(1080, 60);
+            this.pnlHeader.TabIndex = 0;
+            this.pnlHeader.MouseDown += new System.Windows.Forms.MouseEventHandler(this.pnlHeader_MouseDown);
+            this.pnlHeader.MouseMove += new System.Windows.Forms.MouseEventHandler(this.pnlHeader_MouseMove);
+            this.pnlHeader.MouseUp += new System.Windows.Forms.MouseEventHandler(this.pnlHeader_MouseUp);
+
             // lblTitle
-            // 
-            lblTitle.AutoSize = true;
-            lblTitle.Font = new Font("Segoe UI", 13.8F, FontStyle.Bold);
-            lblTitle.ForeColor = Color.White;
-            lblTitle.Location = new Point(55, 11);
-            lblTitle.Name = "lblTitle";
-            lblTitle.Size = new Size(207, 31);
-            lblTitle.TabIndex = 1;
-            lblTitle.Text = "Стрічка WayPoint";
-            // 
-            // pbBack
-            // 
-            pbBack.Cursor = Cursors.Hand;
-            pbBack.Image = Properties.Resources.Home3_37171;
-            pbBack.Location = new Point(12, 12);
-            pbBack.Margin = new Padding(3, 4, 3, 4);
-            pbBack.Name = "pbBack";
-            pbBack.Size = new Size(30, 38);
-            pbBack.SizeMode = PictureBoxSizeMode.Zoom;
-            pbBack.TabIndex = 2;
-            pbBack.TabStop = false;
-            pbBack.Click += pbBack_Click;
-            // 
-            // pbExit
-            // 
-            pbExit.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            pbExit.Cursor = Cursors.Hand;
-            pbExit.Image = Properties.Resources.free_icon_window_14062773;
-            pbExit.Location = new Point(808, 12);
-            pbExit.Margin = new Padding(3, 4, 3, 4);
-            pbExit.Name = "pbExit";
-            pbExit.Size = new Size(30, 38);
-            pbExit.SizeMode = PictureBoxSizeMode.Zoom;
-            pbExit.TabIndex = 3;
-            pbExit.TabStop = false;
-            pbExit.Click += pbExit_Click;
+            this.lblTitle.AutoSize = true;
+            this.lblTitle.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Bold);
+            this.lblTitle.ForeColor = System.Drawing.Color.White;
+            this.lblTitle.Location = new System.Drawing.Point(60, 15);
+            this.lblTitle.Name = "lblTitle";
+            this.lblTitle.Size = new System.Drawing.Size(207, 31);
+            this.lblTitle.Text = "Стрічка WayPoint";
+
+            // lblBack
+            this.lblBack.AutoSize = true;
+            this.lblBack.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.lblBack.Font = new System.Drawing.Font("Segoe UI", 16F, System.Drawing.FontStyle.Bold);
+            this.lblBack.ForeColor = System.Drawing.Color.LightGray;
+            this.lblBack.Location = new System.Drawing.Point(15, 12);
+            this.lblBack.Name = "lblBack";
+            this.lblBack.Size = new System.Drawing.Size(42, 37);
+            this.lblBack.Text = "⬅️";
+            this.lblBack.Click += new System.EventHandler(this.pbBack_Click);
+            this.lblBack.MouseEnter += (s, e) => this.lblBack.ForeColor = System.Drawing.Color.White;
+            this.lblBack.MouseLeave += (s, e) => this.lblBack.ForeColor = System.Drawing.Color.LightGray;
+
+            // lblExit
+            this.lblExit.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblExit.AutoSize = true;
+            this.lblExit.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.lblExit.Font = new System.Drawing.Font("Segoe UI", 16F, System.Drawing.FontStyle.Bold);
+            this.lblExit.ForeColor = System.Drawing.Color.LightGray;
+            this.lblExit.Location = new System.Drawing.Point(1030, 12);
+            this.lblExit.Name = "lblExit";
+            this.lblExit.Size = new System.Drawing.Size(42, 37);
+            this.lblExit.Text = "❌";
+            this.lblExit.Click += new System.EventHandler(this.pbExit_Click);
+            this.lblExit.MouseEnter += (s, e) => this.lblExit.ForeColor = System.Drawing.Color.White;
+            this.lblExit.MouseLeave += (s, e) => this.lblExit.ForeColor = System.Drawing.Color.LightGray;
+
             // 
             // tabControlFeed
             // 
-            tabControlFeed.Controls.Add(tabMyTrips);
-            tabControlFeed.Controls.Add(tabGlobalFeed);
-            tabControlFeed.Dock = DockStyle.Fill;
-            tabControlFeed.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
-            tabControlFeed.Location = new Point(0, 62);
-            tabControlFeed.Margin = new Padding(3, 4, 3, 4);
-            tabControlFeed.Name = "tabControlFeed";
-            tabControlFeed.Padding = new Point(20, 10);
-            tabControlFeed.SelectedIndex = 0;
-            tabControlFeed.Size = new Size(850, 750);
-            tabControlFeed.TabIndex = 1;
-            // 
-            // tabMyTrips
-            // 
-            tabMyTrips.BackColor = Color.Gainsboro;
-            tabMyTrips.Controls.Add(flowMyTrips);
-            tabMyTrips.Location = new Point(4, 51);
-            tabMyTrips.Margin = new Padding(3, 4, 3, 4);
-            tabMyTrips.Name = "tabMyTrips";
-            tabMyTrips.Padding = new Padding(3, 4, 3, 4);
-            tabMyTrips.Size = new Size(842, 695);
-            tabMyTrips.TabIndex = 0;
-            tabMyTrips.Text = "✍️ Мої подорожі";
-            // 
-            // flowMyTrips
-            // 
-            flowMyTrips.AutoScroll = true;
-            flowMyTrips.Dock = DockStyle.Fill;
-            flowMyTrips.Location = new Point(3, 4);
-            flowMyTrips.Margin = new Padding(3, 4, 3, 4);
-            flowMyTrips.Name = "flowMyTrips";
-            flowMyTrips.Padding = new Padding(15, 19, 15, 19);
-            flowMyTrips.Size = new Size(836, 687);
-            flowMyTrips.TabIndex = 0;
-            // 
-            // tabGlobalFeed
-            // 
-            tabGlobalFeed.BackColor = Color.Gainsboro;
-            tabGlobalFeed.Controls.Add(flowGlobalFeed);
-            tabGlobalFeed.Location = new Point(4, 51);
-            tabGlobalFeed.Margin = new Padding(3, 4, 3, 4);
-            tabGlobalFeed.Name = "tabGlobalFeed";
-            tabGlobalFeed.Padding = new Padding(3, 4, 3, 4);
-            tabGlobalFeed.Size = new Size(842, 695);
-            tabGlobalFeed.TabIndex = 1;
-            tabGlobalFeed.Text = "🌍 Стрічка спільноти";
-            // 
-            // flowGlobalFeed
-            // 
-            flowGlobalFeed.AutoScroll = true;
-            flowGlobalFeed.Dock = DockStyle.Fill;
-            flowGlobalFeed.Location = new Point(3, 4);
-            flowGlobalFeed.Margin = new Padding(3, 4, 3, 4);
-            flowGlobalFeed.Name = "flowGlobalFeed";
-            flowGlobalFeed.Padding = new Padding(15, 19, 15, 19);
-            flowGlobalFeed.Size = new Size(836, 687);
-            flowGlobalFeed.TabIndex = 0;
-            // 
-            // UserFeedForm
-            // 
-            AutoScaleDimensions = new SizeF(8F, 20F);
-            AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(850, 812);
-            Controls.Add(tabControlFeed);
-            Controls.Add(pnlHeader);
-            FormBorderStyle = FormBorderStyle.None;
-            Margin = new Padding(3, 4, 3, 4);
-            Name = "UserFeedForm";
-            StartPosition = FormStartPosition.CenterScreen;
-            Text = "Стрічка";
-            Load += UserFeedForm_Load;
-            pnlHeader.ResumeLayout(false);
-            pnlHeader.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)pbBack).EndInit();
-            ((System.ComponentModel.ISupportInitialize)pbExit).EndInit();
-            tabControlFeed.ResumeLayout(false);
-            tabMyTrips.ResumeLayout(false);
-            tabGlobalFeed.ResumeLayout(false);
-            ResumeLayout(false);
+            this.tabControlFeed.Controls.Add(this.tabMyTrips);
+            this.tabControlFeed.Controls.Add(this.tabGlobalFeed);
+            this.tabControlFeed.Dock = System.Windows.Forms.DockStyle.Fill; // ГУМОВИЙ НА ВЕСЬ ЕКРАН
+            this.tabControlFeed.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
+            this.tabControlFeed.Location = new System.Drawing.Point(0, 60);
+            this.tabControlFeed.Name = "tabControlFeed";
+            this.tabControlFeed.Padding = new System.Drawing.Point(20, 10);
+            this.tabControlFeed.SelectedIndex = 0;
+            this.tabControlFeed.Size = new System.Drawing.Size(1080, 620);
+            this.tabControlFeed.TabIndex = 1;
 
+            // tabMyTrips
+            this.tabMyTrips.BackColor = System.Drawing.Color.Gainsboro;
+            this.tabMyTrips.Controls.Add(this.flowMyTrips);
+            this.tabMyTrips.Location = new System.Drawing.Point(4, 51);
+            this.tabMyTrips.Name = "tabMyTrips";
+            this.tabMyTrips.Padding = new System.Windows.Forms.Padding(3);
+            this.tabMyTrips.Size = new System.Drawing.Size(1072, 565);
+            this.tabMyTrips.TabIndex = 0;
+            this.tabMyTrips.Text = "✍️ Мої подорожі";
+
+            // flowMyTrips
+            this.flowMyTrips.AutoScroll = true;
+            this.flowMyTrips.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.flowMyTrips.Location = new System.Drawing.Point(3, 3);
+            this.flowMyTrips.Name = "flowMyTrips";
+            this.flowMyTrips.Padding = new System.Windows.Forms.Padding(15);
+            this.flowMyTrips.Size = new System.Drawing.Size(1066, 559);
+            this.flowMyTrips.TabIndex = 0;
+
+            // tabGlobalFeed
+            this.tabGlobalFeed.BackColor = System.Drawing.Color.Gainsboro;
+            this.tabGlobalFeed.Controls.Add(this.flowGlobalFeed);
+            this.tabGlobalFeed.Location = new System.Drawing.Point(4, 51);
+            this.tabGlobalFeed.Name = "tabGlobalFeed";
+            this.tabGlobalFeed.Padding = new System.Windows.Forms.Padding(3);
+            this.tabGlobalFeed.Size = new System.Drawing.Size(1072, 565);
+            this.tabGlobalFeed.TabIndex = 1;
+            this.tabGlobalFeed.Text = "🌍 Стрічка спільноти";
+
+            // flowGlobalFeed
+            this.flowGlobalFeed.AutoScroll = true;
+            this.flowGlobalFeed.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.flowGlobalFeed.Location = new System.Drawing.Point(3, 3);
+            this.flowGlobalFeed.Name = "flowGlobalFeed";
+            this.flowGlobalFeed.Padding = new System.Windows.Forms.Padding(15);
+            this.flowGlobalFeed.Size = new System.Drawing.Size(1066, 559);
+            this.flowGlobalFeed.TabIndex = 0;
+
+            // UserFeedForm
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.ClientSize = new System.Drawing.Size(1080, 680);
+            this.WindowState = System.Windows.Forms.FormWindowState.Maximized; // ПОВНИЙ ЕКРАН
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+            this.Controls.Add(this.tabControlFeed);
+            this.Controls.Add(this.pnlHeader);
+            this.Name = "UserFeedForm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.Text = "Стрічка";
+            this.Load += new System.EventHandler(this.UserFeedForm_Load);
+
+            this.pnlHeader.ResumeLayout(false);
+            this.pnlHeader.PerformLayout();
+            this.tabControlFeed.ResumeLayout(false);
+            this.tabMyTrips.ResumeLayout(false);
+            this.tabGlobalFeed.ResumeLayout(false);
+            this.ResumeLayout(false);
         }
 
         #endregion
 
         private System.Windows.Forms.Panel pnlHeader;
         private System.Windows.Forms.Label lblTitle;
-        private System.Windows.Forms.PictureBox pbBack;
-        private System.Windows.Forms.PictureBox pbExit;
+        private System.Windows.Forms.Label lblBack;
+        private System.Windows.Forms.Label lblExit;
         private System.Windows.Forms.TabControl tabControlFeed;
         private System.Windows.Forms.TabPage tabMyTrips;
         private System.Windows.Forms.FlowLayoutPanel flowMyTrips;

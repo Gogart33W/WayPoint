@@ -1,4 +1,8 @@
-﻿namespace WayPoint
+﻿using System;
+using System.Drawing;
+using System.Windows.Forms;
+
+namespace WayPoint
 {
     partial class AdminUsersForm
     {
@@ -10,172 +14,202 @@
             base.Dispose(disposing);
         }
 
-        #region Windows Form Designer generated code
-
         private void InitializeComponent()
         {
             this.pnlHeader = new System.Windows.Forms.Panel();
             this.lblTitle = new System.Windows.Forms.Label();
-            this.btnBack = new System.Windows.Forms.Button();
-            this.btnAddAdmin = new System.Windows.Forms.Button();
-            this.btnDeleteUser = new System.Windows.Forms.Button();
+            this.lblBack = new System.Windows.Forms.Label();
+            this.lblExit = new System.Windows.Forms.Label();
+
+            this.pnlSidebar = new System.Windows.Forms.Panel(); // КАРТКА ЛІВОРАУЧ
+            this.lblSidebarTitle = new System.Windows.Forms.Label();
+            this.txtUsername = new System.Windows.Forms.TextBox();
+            this.txtEmail = new System.Windows.Forms.TextBox();
+            this.cmbRole = new System.Windows.Forms.ComboBox();
+            this.btnSave = new System.Windows.Forms.Button();
+            this.btnDelete = new System.Windows.Forms.Button();
+
+            this.pnlData = new System.Windows.Forms.Panel(); // КАРТКА ПРАВОРУЧ
             this.dgvUsers = new System.Windows.Forms.DataGridView();
-            this.btnOpenTours = new System.Windows.Forms.Button();
-            this.btnOpenFeed = new System.Windows.Forms.Button();
+            this.lblDataTitle = new System.Windows.Forms.Label();
+
             this.pnlHeader.SuspendLayout();
+            this.pnlSidebar.SuspendLayout();
+            this.pnlData.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvUsers)).BeginInit();
             this.SuspendLayout();
-            // 
-            // pnlHeader
-            // 
-            this.pnlHeader.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(44)))), ((int)(((byte)(62)))), ((int)(((byte)(80)))));
+
+            // ===== HEADER =====
+            this.pnlHeader.BackColor = Color.FromArgb(31, 41, 55);
             this.pnlHeader.Controls.Add(this.lblTitle);
-            this.pnlHeader.Controls.Add(this.btnBack);
-            this.pnlHeader.Dock = System.Windows.Forms.DockStyle.Top;
-            this.pnlHeader.Location = new System.Drawing.Point(0, 0);
-            this.pnlHeader.Name = "pnlHeader";
-            this.pnlHeader.Size = new System.Drawing.Size(800, 50);
-            this.pnlHeader.TabIndex = 0;
-            this.pnlHeader.MouseDown += new System.Windows.Forms.MouseEventHandler(this.pnlHeader_MouseDown);
-            this.pnlHeader.MouseMove += new System.Windows.Forms.MouseEventHandler(this.pnlHeader_MouseMove);
-            this.pnlHeader.MouseUp += new System.Windows.Forms.MouseEventHandler(this.pnlHeader_MouseUp);
-            // 
-            // lblTitle
-            // 
+            this.pnlHeader.Controls.Add(this.lblBack);
+            this.pnlHeader.Controls.Add(this.lblExit);
+            this.pnlHeader.Dock = DockStyle.Top;
+            this.pnlHeader.Height = 60;
+
+            this.lblTitle.Text = "WayPoint | Панель Адміністратора";
+            this.lblTitle.ForeColor = Color.White;
+            this.lblTitle.Font = new Font("Segoe UI", 14, FontStyle.Bold);
+            this.lblTitle.Location = new Point(60, 15);
             this.lblTitle.AutoSize = true;
-            this.lblTitle.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Bold);
-            this.lblTitle.ForeColor = System.Drawing.Color.White;
-            this.lblTitle.Location = new System.Drawing.Point(15, 10);
-            this.lblTitle.Name = "lblTitle";
-            this.lblTitle.Size = new System.Drawing.Size(465, 32);
-            this.lblTitle.TabIndex = 1;
-            this.lblTitle.Text = "Управління користувачами (SuperAdmin)";
-            // 
-            // btnBack
-            // 
-            this.btnBack.BackColor = System.Drawing.Color.Transparent;
-            this.btnBack.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnBack.FlatAppearance.BorderSize = 0;
-            this.btnBack.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnBack.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold);
-            this.btnBack.ForeColor = System.Drawing.Color.White;
-            this.btnBack.Location = new System.Drawing.Point(750, 5);
-            this.btnBack.Name = "btnBack";
-            this.btnBack.Size = new System.Drawing.Size(40, 40);
-            this.btnBack.TabIndex = 0;
-            this.btnBack.Text = "✕";
-            this.btnBack.UseVisualStyleBackColor = false;
-            this.btnBack.Click += new System.EventHandler(this.btnBack_Click);
-            // 
-            // btnAddAdmin
-            // 
-            this.btnAddAdmin.BackColor = System.Drawing.Color.MediumSeaGreen;
-            this.btnAddAdmin.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnAddAdmin.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnAddAdmin.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
-            this.btnAddAdmin.ForeColor = System.Drawing.Color.White;
-            this.btnAddAdmin.Location = new System.Drawing.Point(20, 70);
-            this.btnAddAdmin.Name = "btnAddAdmin";
-            this.btnAddAdmin.Size = new System.Drawing.Size(220, 40);
-            this.btnAddAdmin.TabIndex = 1;
-            this.btnAddAdmin.Text = "+ Додати Адміністратора";
-            this.btnAddAdmin.UseVisualStyleBackColor = false;
-            this.btnAddAdmin.Click += new System.EventHandler(this.btnAddAdmin_Click);
-            // 
-            // btnDeleteUser
-            // 
-            this.btnDeleteUser.BackColor = System.Drawing.Color.Crimson;
-            this.btnDeleteUser.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnDeleteUser.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnDeleteUser.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
-            this.btnDeleteUser.ForeColor = System.Drawing.Color.White;
-            this.btnDeleteUser.Location = new System.Drawing.Point(250, 70);
-            this.btnDeleteUser.Name = "btnDeleteUser";
-            this.btnDeleteUser.Size = new System.Drawing.Size(180, 40);
-            this.btnDeleteUser.TabIndex = 2;
-            this.btnDeleteUser.Text = "🗑 Видалити акаунт";
-            this.btnDeleteUser.UseVisualStyleBackColor = false;
-            this.btnDeleteUser.Click += new System.EventHandler(this.btnDeleteUser_Click);
-            // 
-            // btnOpenTours
-            // 
-            this.btnOpenTours.BackColor = System.Drawing.Color.SteelBlue;
-            this.btnOpenTours.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnOpenTours.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnOpenTours.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            this.btnOpenTours.ForeColor = System.Drawing.Color.White;
-            this.btnOpenTours.Location = new System.Drawing.Point(450, 70);
-            this.btnOpenTours.Name = "btnOpenTours";
-            this.btnOpenTours.Size = new System.Drawing.Size(150, 40);
-            this.btnOpenTours.TabIndex = 4;
-            this.btnOpenTours.Text = "✈️ База подорожей";
-            this.btnOpenTours.UseVisualStyleBackColor = false;
-            this.btnOpenTours.Click += new System.EventHandler(this.btnOpenTours_Click);
-            // 
-            // btnOpenFeed
-            // 
-            this.btnOpenFeed.BackColor = System.Drawing.Color.DarkOrchid;
-            this.btnOpenFeed.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnOpenFeed.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnOpenFeed.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            this.btnOpenFeed.ForeColor = System.Drawing.Color.White;
-            this.btnOpenFeed.Location = new System.Drawing.Point(610, 70);
-            this.btnOpenFeed.Name = "btnOpenFeed";
-            this.btnOpenFeed.Size = new System.Drawing.Size(170, 40);
-            this.btnOpenFeed.TabIndex = 5;
-            this.btnOpenFeed.Text = "🌍 Модерація стрічки";
-            this.btnOpenFeed.UseVisualStyleBackColor = false;
-            this.btnOpenFeed.Click += new System.EventHandler(this.btnOpenFeed_Click);
-            // 
-            // dgvUsers
-            // 
-            this.dgvUsers.AllowUserToAddRows = false;
-            this.dgvUsers.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.dgvUsers.BackgroundColor = System.Drawing.Color.White;
-            this.dgvUsers.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.dgvUsers.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvUsers.Location = new System.Drawing.Point(20, 130);
-            this.dgvUsers.MultiSelect = false;
-            this.dgvUsers.Name = "dgvUsers";
+
+            this.lblBack.Text = "⬅️";
+            this.lblBack.Font = new Font("Segoe UI", 16F, FontStyle.Bold);
+            this.lblBack.ForeColor = Color.LightGray;
+            this.lblBack.Location = new Point(15, 12);
+            this.lblBack.AutoSize = true;
+            this.lblBack.Cursor = Cursors.Hand;
+            this.lblBack.Click += new EventHandler(this.btnBack_Click);
+            this.lblBack.MouseEnter += (s, e) => this.lblBack.ForeColor = Color.White;
+            this.lblBack.MouseLeave += (s, e) => this.lblBack.ForeColor = Color.LightGray;
+
+            this.lblExit.Text = "❌";
+            this.lblExit.Font = new Font("Segoe UI", 16F, FontStyle.Bold);
+            this.lblExit.ForeColor = Color.LightGray;
+            this.lblExit.Location = new Point(1030, 12);
+            this.lblExit.AutoSize = true;
+            this.lblExit.Cursor = Cursors.Hand;
+            this.lblExit.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            this.lblExit.Click += (s, e) => Application.Exit();
+            this.lblExit.MouseEnter += (s, e) => this.lblExit.ForeColor = Color.White;
+            this.lblExit.MouseLeave += (s, e) => this.lblExit.ForeColor = Color.LightGray;
+
+            // ===== SIDEBAR (БІЛА КАРТКА БЕЗ РАМКИ) =====
+            this.pnlSidebar.BackColor = Color.White;
+            this.pnlSidebar.Location = new Point(20, 80);
+            this.pnlSidebar.Size = new Size(320, 580);
+            this.pnlSidebar.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
+
+            this.lblSidebarTitle.Text = "Профіль користувача";
+            this.lblSidebarTitle.Font = new Font("Segoe UI", 14, FontStyle.Bold);
+            this.lblSidebarTitle.ForeColor = Color.FromArgb(31, 41, 55);
+            this.lblSidebarTitle.Location = new Point(20, 20);
+            this.lblSidebarTitle.AutoSize = true;
+
+            AddLabel("Логін", 70, this.pnlSidebar);
+            this.txtUsername.Location = new Point(20, 95);
+            this.txtUsername.Size = new Size(275, 29);
+            this.txtUsername.Font = new Font("Segoe UI", 12F);
+            this.txtUsername.BackColor = Color.FromArgb(243, 244, 246);
+            this.txtUsername.BorderStyle = BorderStyle.FixedSingle;
+            this.pnlSidebar.Controls.Add(this.txtUsername);
+
+            AddLabel("Електронна пошта", 140, this.pnlSidebar);
+            this.txtEmail.Location = new Point(20, 165);
+            this.txtEmail.Size = new Size(275, 29);
+            this.txtEmail.Font = new Font("Segoe UI", 12F);
+            this.txtEmail.BackColor = Color.FromArgb(243, 244, 246);
+            this.txtEmail.BorderStyle = BorderStyle.FixedSingle;
+            this.pnlSidebar.Controls.Add(this.txtEmail);
+
+            AddLabel("Системна роль", 210, this.pnlSidebar);
+            this.cmbRole.Items.AddRange(new object[] { "Admin", "Manager", "User" });
+            this.cmbRole.Location = new Point(20, 235);
+            this.cmbRole.Size = new Size(275, 29);
+            this.cmbRole.DropDownStyle = ComboBoxStyle.DropDownList;
+            this.cmbRole.Font = new Font("Segoe UI", 11F);
+            this.cmbRole.BackColor = Color.FromArgb(243, 244, 246);
+            this.pnlSidebar.Controls.Add(this.cmbRole);
+
+            this.btnSave.Location = new Point(20, 300);
+            this.btnSave.Size = new Size(275, 45);
+            this.btnSave.Text = "💾 Зберегти зміни";
+            this.btnSave.BackColor = Color.FromArgb(16, 185, 129); // Emerald
+            this.btnSave.ForeColor = Color.White;
+            this.btnSave.FlatAppearance.BorderSize = 0;
+            this.btnSave.FlatStyle = FlatStyle.Flat;
+            this.btnSave.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
+            this.btnSave.Cursor = Cursors.Hand;
+            this.btnSave.Click += new EventHandler(this.btnSave_Click);
+            this.pnlSidebar.Controls.Add(this.btnSave);
+
+            this.btnDelete.Location = new Point(20, 360);
+            this.btnDelete.Size = new Size(275, 45);
+            this.btnDelete.Text = "🗑 Видалити акаунт";
+            this.btnDelete.BackColor = Color.FromArgb(239, 68, 68); // Red
+            this.btnDelete.ForeColor = Color.White;
+            this.btnDelete.FlatAppearance.BorderSize = 0;
+            this.btnDelete.FlatStyle = FlatStyle.Flat;
+            this.btnDelete.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
+            this.btnDelete.Cursor = Cursors.Hand;
+            this.btnDelete.Click += new EventHandler(this.btnDelete_Click);
+            this.pnlSidebar.Controls.Add(this.btnDelete);
+
+            // ===== DATA PANEL (БІЛА КАРТКА ПРАВОРУЧ) =====
+            this.pnlData.BackColor = Color.White;
+            this.pnlData.Location = new Point(360, 80);
+            this.pnlData.Size = new Size(700, 580);
+            this.pnlData.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+
+            this.lblDataTitle.Text = "Список зареєстрованих користувачів";
+            this.lblDataTitle.Font = new Font("Segoe UI", 14, FontStyle.Bold);
+            this.lblDataTitle.ForeColor = Color.FromArgb(31, 41, 55);
+            this.lblDataTitle.Location = new Point(20, 20);
+            this.lblDataTitle.AutoSize = true;
+
+            // Красива таблиця
+            this.dgvUsers.Location = new Point(20, 70);
+            this.dgvUsers.Size = new Size(660, 490);
+            this.dgvUsers.BackgroundColor = Color.White;
+            this.dgvUsers.BorderStyle = BorderStyle.None;
+            this.dgvUsers.EnableHeadersVisualStyles = false;
+            this.dgvUsers.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(243, 244, 246);
+            this.dgvUsers.ColumnHeadersDefaultCellStyle.ForeColor = Color.Black;
+            this.dgvUsers.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
+            this.dgvUsers.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
+            this.dgvUsers.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
+            this.dgvUsers.DefaultCellStyle.SelectionBackColor = Color.FromArgb(224, 231, 255); // Ніжно синій при виділенні
+            this.dgvUsers.DefaultCellStyle.SelectionForeColor = Color.Black;
+            this.dgvUsers.DefaultCellStyle.Font = new Font("Segoe UI", 10F);
             this.dgvUsers.RowHeadersVisible = false;
-            this.dgvUsers.RowHeadersWidth = 51;
-            this.dgvUsers.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvUsers.Size = new System.Drawing.Size(760, 340);
-            this.dgvUsers.TabIndex = 3;
-            // 
-            // AdminUsersForm
-            // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.ClientSize = new System.Drawing.Size(800, 500);
-            this.Controls.Add(this.btnOpenFeed);
-            this.Controls.Add(this.btnOpenTours);
-            this.Controls.Add(this.dgvUsers);
-            this.Controls.Add(this.btnDeleteUser);
-            this.Controls.Add(this.btnAddAdmin);
+            this.dgvUsers.AllowUserToAddRows = false;
+            this.dgvUsers.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            this.dgvUsers.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            this.dgvUsers.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+
+            this.pnlData.Controls.Add(this.lblDataTitle);
+            this.pnlData.Controls.Add(this.dgvUsers);
+
+            // ===== FORM CONFIG =====
+            this.ClientSize = new Size(1080, 680);
+            this.BackColor = Color.FromArgb(243, 244, 246); // СВІТЛО-СІРИЙ ФОН МІЖ КАРТКАМИ
+            this.WindowState = FormWindowState.Maximized;
+            this.FormBorderStyle = FormBorderStyle.None;
             this.Controls.Add(this.pnlHeader);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-            this.Name = "AdminUsersForm";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Управління користувачами";
-            this.Load += new System.EventHandler(this.AdminUsersForm_Load);
+            this.Controls.Add(this.pnlSidebar);
+            this.Controls.Add(this.pnlData);
+            this.StartPosition = FormStartPosition.CenterScreen;
+            this.Load += new EventHandler(this.AdminUsersForm_Load);
+
             this.pnlHeader.ResumeLayout(false);
             this.pnlHeader.PerformLayout();
+            this.pnlSidebar.ResumeLayout(false);
+            this.pnlSidebar.PerformLayout();
+            this.pnlData.ResumeLayout(false);
+            this.pnlData.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvUsers)).EndInit();
             this.ResumeLayout(false);
-
         }
 
-        #endregion
+        private void AddLabel(string text, int y, Control parent)
+        {
+            Label lbl = new Label { Text = text, Location = new Point(20, y), AutoSize = true, Font = new Font("Segoe UI Semibold", 10F, FontStyle.Bold), ForeColor = Color.Gray };
+            parent.Controls.Add(lbl);
+        }
 
-        private System.Windows.Forms.Panel pnlHeader;
-        private System.Windows.Forms.Button btnBack;
-        private System.Windows.Forms.Label lblTitle;
-        private System.Windows.Forms.Button btnAddAdmin;
-        private System.Windows.Forms.Button btnDeleteUser;
-        private System.Windows.Forms.DataGridView dgvUsers;
-        private System.Windows.Forms.Button btnOpenTours;
-        private System.Windows.Forms.Button btnOpenFeed;
+        private Panel pnlHeader;
+        private Label lblTitle;
+        private Label lblBack;
+        private Label lblExit;
+        private Panel pnlSidebar;
+        private Label lblSidebarTitle;
+        private TextBox txtUsername;
+        private TextBox txtEmail;
+        private ComboBox cmbRole;
+        private Button btnSave;
+        private Button btnDelete;
+        private Panel pnlData;
+        private DataGridView dgvUsers;
+        private Label lblDataTitle;
     }
 }

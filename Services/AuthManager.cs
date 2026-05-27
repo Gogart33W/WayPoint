@@ -92,7 +92,7 @@ namespace WayPoint.Services
                         {
                             string dbHash = reader["Password"].ToString();
                             bool isVerified = Convert.ToBoolean(reader["IsEmailVerified"]);
-                            string realUsername = reader["Username"].ToString(); // Дістаємо справжній логін з бази
+                            string realUsername = reader["Username"].ToString();
 
                             // Перевіряємо хеш пароля
                             if (BCrypt.Net.BCrypt.Verify(password, dbHash))
@@ -102,7 +102,7 @@ namespace WayPoint.Services
 
                                 var user = new Models.User
                                 {
-                                    Username = realUsername, // У сесію записуємо логін, навіть якщо ввійшли по пошті
+                                    Username = realUsername,
                                     Role = reader["Role"].ToString()
                                 };
                                 Session.Username = user.Username;
@@ -119,6 +119,39 @@ namespace WayPoint.Services
                 if (ex.Message.StartsWith("NOT_VERIFIED")) throw;
             }
             return null;
+        }
+
+        // НОВІ МЕТОДИ ДЛЯ ВІДНОВЛЕННЯ ПАРОЛЯ
+        public static string GetEmailByUsername(string username)
+        {
+            try
+            {
+                using (var conn = DatabaseService.GetConnection())
+                {
+                    var cmd = new SqlCommand("SELECT Email FROM Users WHERE Username=@u", conn);
+                    cmd.Parameters.AddWithValue("@u", username);
+                    var res = cmd.ExecuteScalar();
+                    if (res != null && res != DBNull.Value) return res.ToString();
+                }
+            }
+            catch { }
+            return null;
+        }
+
+        public static void UpdatePassword(string username, string newPassword)
+        {
+            try
+            {
+                using (var conn = DatabaseService.GetConnection())
+                {
+                    string hash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+                    var cmd = new SqlCommand("UPDATE Users SET Password=@p WHERE Username=@u", conn);
+                    cmd.Parameters.AddWithValue("@p", hash);
+                    cmd.Parameters.AddWithValue("@u", username);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+            catch { }
         }
     }
 }

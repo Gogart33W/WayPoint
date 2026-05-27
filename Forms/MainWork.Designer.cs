@@ -105,15 +105,14 @@ namespace WayPoint
             // ===== SIDEBAR =====
             this.pnlSidebar.BackColor = Color.White;
             this.pnlSidebar.Location = new Point(20, 80);
-            this.pnlSidebar.Size = new Size(320, 590); // ЗБІЛЬШЕНО ВИСОТУ ДЛЯ РАМОК
+            this.pnlSidebar.Size = new Size(320, 595);
             this.pnlSidebar.BorderStyle = BorderStyle.FixedSingle;
 
-            this.lblSidebarTitle.Text = "Новий тур";
+            this.lblSidebarTitle.Text = "Деталі туру";
             this.lblSidebarTitle.Font = new Font("Segoe UI", 12, FontStyle.Bold);
             this.lblSidebarTitle.Location = new Point(20, 10);
             this.lblSidebarTitle.AutoSize = true;
 
-            // Країна + Місто
             AddLabel("Куди (Країна)", 45, 20);
             this.txtCountry.Location = new Point(20, 65);
             this.txtCountry.Size = new Size(130, 30);
@@ -132,7 +131,6 @@ namespace WayPoint
             this.btnOpenMap.FlatAppearance.BorderSize = 0;
             this.btnOpenMap.Click += new EventHandler(this.btnOpenMap_Click);
 
-            // Звідки + Транспорт
             AddLabel("Звідки (Місто)", 100, 20);
             this.txtDepartureCity.Location = new Point(20, 120);
             this.txtDepartureCity.Size = new Size(130, 30);
@@ -147,7 +145,6 @@ namespace WayPoint
             this.cmbTransport.SelectedIndex = 0;
             this.cmbTransport.Font = new Font("Segoe UI", 10F);
 
-            // Дорослі + Ночі
             AddLabel("👥 Дорослі", 155, 20);
             this.numAdults.Location = new Point(20, 175);
             this.numAdults.Size = new Size(60, 30);
@@ -164,7 +161,6 @@ namespace WayPoint
             this.numNights.Value = 7;
             this.numNights.Font = new Font("Segoe UI", 10F);
 
-            // Харчування
             AddLabel("🍴 Харчування", 155, 170);
             this.cmbBoard.Items.AddRange(new object[] { "RO (Без їжі)", "BB (Сніданок)", "HB (Снід.+Веч.)", "FB (3-разове)", "AI (Все вкл.)" });
             this.cmbBoard.Location = new Point(170, 175);
@@ -173,7 +169,6 @@ namespace WayPoint
             this.cmbBoard.SelectedIndex = 4;
             this.cmbBoard.Font = new Font("Segoe UI", 10F);
 
-            // Готель
             AddLabel("🏨 Готель (Довідник)", 215, 20);
             this.txtHotel.Location = new Point(20, 235);
             this.txtHotel.Size = new Size(280, 30);
@@ -183,7 +178,6 @@ namespace WayPoint
             this.txtHotel.Text = "Натисніть для вибору готелю...";
             this.txtHotel.ForeColor = Color.Gray;
 
-            // Ринкова ціна
             AddLabel("Ринкова ціна (Авто) $", 275, 20);
             this.numMarketPrice.Location = new Point(20, 295);
             this.numMarketPrice.Size = new Size(280, 30);
@@ -194,7 +188,6 @@ namespace WayPoint
             this.numMarketPrice.BackColor = Color.FromArgb(243, 244, 246);
             this.numMarketPrice.Font = new Font("Segoe UI", 10F);
 
-            // НАША ЦІНА
             AddLabel("НАША ЦІНА ($)", 335, 20);
             this.numBudget.Location = new Point(20, 355);
             this.numBudget.Size = new Size(280, 30);
@@ -204,7 +197,6 @@ namespace WayPoint
             this.numBudget.Font = new Font("Segoe UI", 12, FontStyle.Bold);
             this.numBudget.BackColor = Color.FromArgb(220, 252, 231);
 
-            // Статус + Клієнт
             AddLabel("Статус", 395, 20);
             this.cmbStatus.Items.AddRange(new object[] { "Запит", "Планується", "Завершено" });
             this.cmbStatus.Location = new Point(20, 415);
@@ -219,17 +211,17 @@ namespace WayPoint
             this.cmbAssignedUser.DropDownStyle = ComboBoxStyle.DropDownList;
             this.cmbAssignedUser.Font = new Font("Segoe UI", 10F);
 
-            // Кнопки управління
-            this.btnAdd.Location = new Point(20, 480);
+            // Кнопки — з відступом від краю
+            this.btnAdd.Location = new Point(20, 460);
             this.btnAdd.Size = new Size(135, 45);
-            this.btnAdd.Text = "➕ Створити"; // Перейменовано для базового стану
+            this.btnAdd.Text = "➕ Створити";
             this.btnAdd.BackColor = Color.FromArgb(16, 185, 129);
             this.btnAdd.ForeColor = Color.White;
             this.btnAdd.FlatStyle = FlatStyle.Flat;
             this.btnAdd.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
             this.btnAdd.Click += new EventHandler(this.btnAdd_Click);
 
-            this.btnEdit.Location = new Point(165, 480);
+            this.btnEdit.Location = new Point(165, 460);
             this.btnEdit.Size = new Size(135, 45);
             this.btnEdit.Text = "Оновити";
             this.btnEdit.BackColor = Color.FromArgb(245, 158, 11);
@@ -238,7 +230,7 @@ namespace WayPoint
             this.btnEdit.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
             this.btnEdit.Click += new EventHandler(this.btnEdit_Click);
 
-            this.btnDelete.Location = new Point(20, 535);
+            this.btnDelete.Location = new Point(20, 513);
             this.btnDelete.Size = new Size(135, 45);
             this.btnDelete.Text = "Видалити";
             this.btnDelete.BackColor = Color.FromArgb(239, 68, 68);
@@ -247,15 +239,15 @@ namespace WayPoint
             this.btnDelete.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
             this.btnDelete.Click += new EventHandler(this.btnDelete_Click);
 
-            this.btnClear.Location = new Point(165, 535);
+            this.btnClear.Location = new Point(165, 513);
             this.btnClear.Size = new Size(135, 45);
             this.btnClear.Text = "Скинути";
             this.btnClear.BackColor = Color.FromArgb(229, 231, 235);
+            this.btnClear.ForeColor = Color.Black;
             this.btnClear.FlatStyle = FlatStyle.Flat;
             this.btnClear.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
             this.btnClear.Click += new EventHandler(this.btnClear_Click);
 
-            // Додаємо контроли на sidebar
             this.pnlSidebar.Controls.Add(this.lblSidebarTitle);
             this.pnlSidebar.Controls.Add(this.btnAdd);
             this.pnlSidebar.Controls.Add(this.btnEdit);
@@ -277,12 +269,12 @@ namespace WayPoint
 
             // ===== DATA PANEL =====
             this.pnlData.Location = new Point(360, 80);
-            this.pnlData.Size = new Size(700, 590); // ЗБІЛЬШЕНО ВИСОТУ ДЛЯ РАМОК
+            this.pnlData.Size = new Size(700, 595);
             this.pnlData.BackColor = Color.White;
             this.pnlData.BorderStyle = BorderStyle.FixedSingle;
 
             this.dgvData.Location = new Point(20, 70);
-            this.dgvData.Size = new Size(660, 500); // Трішки розтягнуто
+            this.dgvData.Size = new Size(660, 505);
             this.dgvData.BackgroundColor = Color.White;
             this.dgvData.BorderStyle = BorderStyle.None;
 
@@ -294,8 +286,7 @@ namespace WayPoint
             this.pnlData.Controls.Add(this.lblDataTitle);
             this.pnlData.Controls.Add(this.dgvData);
 
-            // ===== ФОРМА =====
-            this.ClientSize = new Size(1080, 680);
+            this.ClientSize = new Size(1080, 695);
             this.Controls.Add(this.pnlHeader);
             this.Controls.Add(this.pnlSidebar);
             this.Controls.Add(this.pnlData);
@@ -303,7 +294,6 @@ namespace WayPoint
             this.StartPosition = FormStartPosition.CenterScreen;
             this.Load += new EventHandler(MainWork_Load);
 
-            // ResumeLayout
             ((System.ComponentModel.ISupportInitialize)(this.numBudget)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numMarketPrice)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numAdults)).EndInit();

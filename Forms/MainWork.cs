@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
@@ -17,6 +18,9 @@ namespace WayPoint
         private decimal currentHotelPricePerNight = 0m;
         private bool isAddingMode = false;
 
+        // Список всіх клієнтів для пошуку
+        private List<string> allClients = new List<string>();
+
         public MainWork()
         {
             InitializeComponent();
@@ -29,12 +33,98 @@ namespace WayPoint
             txtCountry.TextChanged += (s, e) => { ResetHotelSelection(); AutoCalculateMarketPrice(); };
             txtCity.TextChanged += (s, e) => { ResetHotelSelection(); AutoCalculateMarketPrice(); };
             numAdults.ValueChanged += (s, e) => AutoCalculateMarketPrice();
+            numChildren.ValueChanged += (s, e) => AutoCalculateMarketPrice();
             numNights.ValueChanged += (s, e) => AutoCalculateMarketPrice();
             cmbBoard.SelectedIndexChanged += (s, e) => AutoCalculateMarketPrice();
             cmbTransport.SelectedIndexChanged += (s, e) => AutoCalculateMarketPrice();
             numBudget.ValueChanged += (s, e) => AnalyzeBenefit();
+
             txtHotel.Click += (s, e) => OpenHotelDictionary();
             txtHotel.Cursor = Cursors.Hand;
+
+            // Пошук клієнта
+            txtClientSearch.TextChanged += TxtClientSearch_TextChanged;
+            lstClientSearch.Click += LstClientSearch_Click;
+            lstClientSearch.KeyDown += (s, e) =>
+            {
+                if (e.KeyCode == Keys.Enter && lstClientSearch.SelectedItem != null)
+                    SelectClientFromList();
+            };
+
+            // Якщо клік поза listbox — ховаємо його
+            this.Click += (s, e) => HideClientList();
+            pnlSidebar.Click += (s, e) => HideClientList();
+
+            // Час відправлення — автоформат
+            txtDepartureTime.Leave += (s, e) => FormatTime();
+        }
+
+        private void FormatTime()
+        {
+            string t = txtDepartureTime.Text.Trim().Replace(".", ":").Replace("-", ":");
+            if (t.Length == 4 && !t.Contains(":"))
+                t = t.Insert(2, ":");
+            if (System.Text.RegularExpressions.Regex.IsMatch(t, @"^\d{1,2}:\d{2}$"))
+                txtDepartureTime.Text = t;
+        }
+
+        private void cmbTransport_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            // Показуємо панель пересадки тільки для "Літак (Пересадка)"
+            bool isTransfer = cmbTransport.Text == "Літак (Пересадка)";
+            pnlTransfer.Visible = isTransfer;
+            AutoCalculateMarketPrice();
+        }
+
+        // ══════════════════════════════════════════
+        // ПОШУК КЛІЄНТА
+        // ══════════════════════════════════════════
+        private void TxtClientSearch_TextChanged(object sender, EventArgs e)
+        {
+            string query = txtClientSearch.Text.Trim().ToLower();
+            if (string.IsNullOrEmpty(query))
+            {
+                HideClientList();
+                return;
+            }
+
+            lstClientSearch.Items.Clear();
+            foreach (var client in allClients)
+            {
+                if (client.ToLower().Contains(query))
+                    lstClientSearch.Items.Add(client);
+            }
+
+            if (lstClientSearch.Items.Count > 0)
+            {
+                lstClientSearch.Visible = true;
+                lstClientSearch.BringToFront();
+                int height = Math.Min(lstClientSearch.Items.Count * 20 + 8, 120);
+                lstClientSearch.Height = height;
+            }
+            else
+            {
+                HideClientList();
+            }
+        }
+
+        private void LstClientSearch_Click(object sender, EventArgs e)
+        {
+            SelectClientFromList();
+        }
+
+        private void SelectClientFromList()
+        {
+            if (lstClientSearch.SelectedItem == null) return;
+            string selected = lstClientSearch.SelectedItem.ToString();
+            cmbAssignedUser.Text = selected;
+            txtClientSearch.Text = selected;
+            HideClientList();
+        }
+
+        private void HideClientList()
+        {
+            lstClientSearch.Visible = false;
         }
 
         private void ResetHotelSelection()
@@ -68,13 +158,21 @@ namespace WayPoint
             txtCountry.Enabled = enabled;
             txtCity.Enabled = enabled;
             txtDepartureCity.Enabled = enabled;
+            txtDepartureStreet.Enabled = enabled;
+            dtpDepartureDate.Enabled = enabled;
+            txtDepartureTime.Enabled = enabled;
+            txtFlightNumber.Enabled = enabled;
+            txtTerminal.Enabled = enabled;
+            txtTransferCity.Enabled = enabled;
             cmbTransport.Enabled = enabled;
             numAdults.Enabled = enabled;
+            numChildren.Enabled = enabled;
             numNights.Enabled = enabled;
             cmbBoard.Enabled = enabled;
             numBudget.Enabled = enabled;
             cmbStatus.Enabled = enabled;
             cmbAssignedUser.Enabled = enabled;
+            txtClientSearch.Enabled = enabled;
             txtHotel.Enabled = enabled;
             btnOpenMap.Enabled = enabled;
         }
@@ -84,20 +182,18 @@ namespace WayPoint
             isAddingMode = enable;
             if (enable)
             {
-                // Режим створення: кнопка "Підтвердити" на всю ширину
                 btnAdd.Text = "✅ Підтвердити";
-                btnAdd.Location = new Point(20, 460);
-                btnAdd.Size = new Size(280, 45);
+                btnAdd.Location = new Point(10, btnAdd.Location.Y);
+                btnAdd.Size = new Size(305, 44);
 
                 btnEdit.Visible = false;
                 btnDelete.Visible = false;
 
-                // btnClear перетворюється на "Скасувати"
                 btnClear.Text = "❌ Скасувати";
                 btnClear.BackColor = Color.FromArgb(239, 68, 68);
                 btnClear.ForeColor = Color.White;
-                btnClear.Location = new Point(20, 513);
-                btnClear.Size = new Size(280, 45);
+                btnClear.Location = new Point(10, btnClear.Location.Y);
+                btnClear.Size = new Size(305, 44);
 
                 SetInputFieldsState(true);
                 ClearFields();
@@ -110,10 +206,9 @@ namespace WayPoint
             }
             else
             {
-                // Стандартний режим: всі кнопки на місці
                 btnAdd.Text = "➕ Створити";
-                btnAdd.Location = new Point(20, 460);
-                btnAdd.Size = new Size(135, 45);
+                btnAdd.Location = new Point(10, btnAdd.Location.Y);
+                btnAdd.Size = new Size(145, 44);
 
                 btnEdit.Visible = true;
                 btnDelete.Visible = true;
@@ -121,8 +216,8 @@ namespace WayPoint
                 btnClear.Text = "Скинути";
                 btnClear.BackColor = Color.FromArgb(229, 231, 235);
                 btnClear.ForeColor = Color.Black;
-                btnClear.Location = new Point(165, 513);
-                btnClear.Size = new Size(135, 45);
+                btnClear.Location = new Point(165, btnClear.Location.Y);
+                btnClear.Size = new Size(150, 44);
 
                 lblSidebarTitle.Text = "Деталі туру";
                 lblSidebarTitle.ForeColor = Color.Black;
@@ -134,14 +229,27 @@ namespace WayPoint
             txtCountry.Clear();
             txtCity.Clear();
             txtDepartureCity.Text = "Київ";
+            txtDepartureStreet.Clear();
+            dtpDepartureDate.Value = DateTime.Today;
+            txtDepartureTime.Clear();
+            txtFlightNumber.Clear();
+            txtTerminal.Clear();
+            txtTransferCity.Clear();
+            pnlTransfer.Visible = false;
+
             ResetHotelSelection();
+
             if (cmbTransport.Items.Count > 0) cmbTransport.SelectedIndex = 0;
             numBudget.Value = 0;
             numMarketPrice.Value = 0;
             numAdults.Value = 2;
+            numChildren.Value = 0;
             numNights.Value = 7;
             if (cmbBoard.Items.Count > 0) cmbBoard.SelectedIndex = 4;
             if (cmbStatus.Items.Count > 0) cmbStatus.SelectedIndex = 0;
+
+            txtClientSearch.Clear();
+            HideClientList();
         }
 
         private bool CheckUnsavedChanges()
@@ -165,13 +273,22 @@ namespace WayPoint
             if (string.IsNullOrWhiteSpace(txtDepartureCity.Text))
             { MessageBox.Show("Вкажіть місто відправлення!", "Перевірка", MessageBoxButtons.OK, MessageBoxIcon.Warning); return false; }
 
+            if (cmbTransport.Text == "Літак (Пересадка)" && string.IsNullOrWhiteSpace(txtTransferCity.Text))
+            { MessageBox.Show("Вкажіть місто пересадки!", "Перевірка", MessageBoxButtons.OK, MessageBoxIcon.Warning); return false; }
+
+            if (!string.IsNullOrWhiteSpace(txtDepartureTime.Text))
+            {
+                if (!System.Text.RegularExpressions.Regex.IsMatch(txtDepartureTime.Text.Trim(), @"^\d{1,2}:\d{2}$"))
+                { MessageBox.Show("Час відправлення має бути у форматі ГГ:ХХ (напр. 08:30)!", "Перевірка", MessageBoxButtons.OK, MessageBoxIcon.Warning); return false; }
+            }
+
             if (string.IsNullOrWhiteSpace(txtHotel.Text) || txtHotel.Text.Contains("Натисніть"))
             { MessageBox.Show("Оберіть готель з довідника!", "Перевірка", MessageBoxButtons.OK, MessageBoxIcon.Warning); return false; }
 
             if (numBudget.Value <= 0)
             { MessageBox.Show("Вкажіть нашу ціну (більше 0)!", "Перевірка", MessageBoxButtons.OK, MessageBoxIcon.Warning); return false; }
 
-            if (cmbAssignedUser.SelectedIndex < 0)
+            if (cmbAssignedUser.SelectedIndex < 0 && string.IsNullOrEmpty(cmbAssignedUser.Text))
             { MessageBox.Show("Оберіть клієнта!", "Перевірка", MessageBoxButtons.OK, MessageBoxIcon.Warning); return false; }
 
             return true;
@@ -183,6 +300,15 @@ namespace WayPoint
         private void AutoCalculateMarketPrice()
         {
             if (isUpdatingFromGrid) return;
+
+            // БАГ-ФІХ: якщо не вибрано країну і місто — ціна завжди 0
+            if (string.IsNullOrWhiteSpace(txtCountry.Text) && string.IsNullOrWhiteSpace(txtCity.Text))
+            {
+                numMarketPrice.Value = 0;
+                AnalyzeBenefit();
+                return;
+            }
+
             try
             {
                 string loc = (txtCountry.Text + " " + txtCity.Text).Trim().ToLower();
@@ -208,11 +334,12 @@ namespace WayPoint
                 decimal transportPrice = 0m;
                 string transportText = cmbTransport.Text ?? "";
                 if (transportText.Contains("Літак (Прямий)")) transportPrice = 250m;
-                else if (transportText.Contains("Літак (Пересадка)")) transportPrice = 180m;
+                else if (transportText.Contains("Літак (Пересадка)")) transportPrice = 320m; // дорожче через пересадку
                 else if (transportText.Contains("Автобус")) transportPrice = 70m;
                 else if (transportText.Contains("Потяг")) transportPrice = 50m;
+                else if (transportText.Contains("Корабель")) transportPrice = 400m;
 
-                if (baseNight == 20m)
+                if (loc.Contains("україна") || loc.Contains("київ") || loc.Contains("львів") || loc.Contains("одеса"))
                 {
                     if (transportText.Contains("Літак")) transportPrice = 50m;
                     else if (transportText.Contains("Автобус")) transportPrice = 15m;
@@ -221,9 +348,14 @@ namespace WayPoint
 
                 decimal nights = numNights.Value < 1 ? 1 : numNights.Value;
                 decimal adults = numAdults.Value < 1 ? 1 : numAdults.Value;
-                decimal totalCost = (baseNight * boardMult * nights * adults) + (transportPrice * adults);
-                decimal finalMarketPrice = Math.Round(totalCost * 1.10m);
+                decimal children = numChildren.Value;
 
+                // Діти — 60% від дорослої ціни готелю, але повна ціна транспорту (якщо > 2 роки)
+                decimal hotelCost = baseNight * boardMult * nights * (adults + children * 0.6m);
+                decimal transportCost = transportPrice * (adults + children * 0.7m);
+                decimal totalCost = hotelCost + transportCost;
+
+                decimal finalMarketPrice = Math.Round(totalCost * 1.10m);
                 if (finalMarketPrice > numMarketPrice.Maximum) finalMarketPrice = numMarketPrice.Maximum;
                 numMarketPrice.Value = finalMarketPrice;
 
@@ -294,12 +426,14 @@ namespace WayPoint
             travelTable = new DataTable();
             travelTable.Columns.Add("ID", typeof(int));
             travelTable.Columns.Add("User", typeof(string));
-            travelTable.Columns.Add("Departure", typeof(string));
             travelTable.Columns.Add("Country", typeof(string));
             travelTable.Columns.Add("City", typeof(string));
             travelTable.Columns.Add("Hotel", typeof(string));
             travelTable.Columns.Add("Transport", typeof(string));
+            travelTable.Columns.Add("Departure", typeof(string));
+            travelTable.Columns.Add("DepartureDate", typeof(string));
             travelTable.Columns.Add("Adults", typeof(int));
+            travelTable.Columns.Add("Children", typeof(int));
             travelTable.Columns.Add("Nights", typeof(int));
             travelTable.Columns.Add("Budget", typeof(decimal));
             travelTable.Columns.Add("MarketPrice", typeof(decimal));
@@ -335,14 +469,27 @@ namespace WayPoint
                             DataRow row = travelTable.NewRow();
                             row["ID"] = reader["ID"];
                             row["User"] = reader["User"] == DBNull.Value ? "" : reader["User"];
-                            row["Departure"] = reader["DepartureCity"] == DBNull.Value ? "Київ" : reader["DepartureCity"];
                             row["Country"] = reader["Country"] == DBNull.Value ? "" : reader["Country"];
                             row["City"] = reader["City"] == DBNull.Value ? "" : reader["City"];
                             try { row["Hotel"] = reader["HotelName"] == DBNull.Value ? "" : reader["HotelName"]; } catch { row["Hotel"] = ""; }
-                            row["Transport"] = reader["TransportType"] == DBNull.Value ? "Літак (Прямий)" : reader["TransportType"];
+                            row["Transport"] = reader["TransportType"] == DBNull.Value ? "" : reader["TransportType"];
+                            row["Departure"] = reader["DepartureCity"] == DBNull.Value ? "" : reader["DepartureCity"];
+                            try
+                            {
+                                row["DepartureDate"] = reader["DepartureDate"] == DBNull.Value ? "" :
+                                    Convert.ToDateTime(reader["DepartureDate"]).ToString("dd.MM.yyyy");
+                            }
+                            catch { row["DepartureDate"] = ""; }
 
                             int dbAdults = reader["Adults"] == DBNull.Value ? 2 : Convert.ToInt32(reader["Adults"]);
                             row["Adults"] = dbAdults < 1 ? 2 : dbAdults;
+
+                            try
+                            {
+                                int dbChildren = reader["Children"] == DBNull.Value ? 0 : Convert.ToInt32(reader["Children"]);
+                                row["Children"] = dbChildren < 0 ? 0 : dbChildren;
+                            }
+                            catch { row["Children"] = 0; }
 
                             int dbNights = reader["Nights"] == DBNull.Value ? 7 : Convert.ToInt32(reader["Nights"]);
                             row["Nights"] = dbNights < 1 ? 7 : dbNights;
@@ -396,6 +543,25 @@ namespace WayPoint
                                 cmbBoard.Text = reader["BoardType"]?.ToString() ?? "AI (Все вкл.)";
                                 cmbStatus.Text = reader["Status"]?.ToString() ?? "Запит";
                                 cmbAssignedUser.Text = reader["User"]?.ToString() ?? "";
+                                txtClientSearch.Text = reader["User"]?.ToString() ?? "";
+
+                                // Нові поля відправлення
+                                try { txtDepartureStreet.Text = reader["DepartureStreet"]?.ToString() ?? ""; } catch { }
+                                try
+                                {
+                                    if (reader["DepartureDate"] != DBNull.Value)
+                                        dtpDepartureDate.Value = Convert.ToDateTime(reader["DepartureDate"]);
+                                }
+                                catch { dtpDepartureDate.Value = DateTime.Today; }
+                                try { txtDepartureTime.Text = reader["DepartureTime"]?.ToString() ?? ""; } catch { }
+                                try { txtFlightNumber.Text = reader["FlightNumber"]?.ToString() ?? ""; } catch { }
+                                try { txtTerminal.Text = reader["TerminalOrStation"]?.ToString() ?? ""; } catch { }
+                                try
+                                {
+                                    txtTransferCity.Text = reader["TransferCity"]?.ToString() ?? "";
+                                    pnlTransfer.Visible = cmbTransport.Text == "Літак (Пересадка)";
+                                }
+                                catch { }
 
                                 string hotelName = "";
                                 try { hotelName = reader["HotelName"]?.ToString() ?? ""; } catch { }
@@ -418,6 +584,13 @@ namespace WayPoint
 
                                 int dbAdults = reader["Adults"] == DBNull.Value ? 2 : Convert.ToInt32(reader["Adults"]);
                                 numAdults.Value = dbAdults < 1 ? 2 : Math.Min(dbAdults, 100);
+
+                                try
+                                {
+                                    int dbChildren = reader["Children"] == DBNull.Value ? 0 : Convert.ToInt32(reader["Children"]);
+                                    numChildren.Value = Math.Max(0, Math.Min(dbChildren, 20));
+                                }
+                                catch { numChildren.Value = 0; }
 
                                 int dbNights = reader["Nights"] == DBNull.Value ? 7 : Convert.ToInt32(reader["Nights"]);
                                 numNights.Value = dbNights < 1 ? 7 : Math.Min(dbNights, 365);
@@ -470,21 +643,51 @@ namespace WayPoint
         {
             try
             {
+                allClients.Clear();
                 cmbAssignedUser.Items.Clear();
                 using (var conn = DatabaseService.GetConnection())
                 {
-                    // Тільки клієнти — без працівників і адмінів
                     var cmd = new SqlCommand(
                         "SELECT Username FROM Users WHERE Role = 'User' ORDER BY Username", conn);
                     using (var reader = cmd.ExecuteReader())
                     {
                         while (reader.Read())
-                            cmbAssignedUser.Items.Add(reader["Username"].ToString());
+                        {
+                            string username = reader["Username"].ToString();
+                            allClients.Add(username);
+                            cmbAssignedUser.Items.Add(username);
+                        }
                     }
                 }
                 if (cmbAssignedUser.Items.Count > 0) cmbAssignedUser.SelectedIndex = 0;
             }
             catch { }
+        }
+
+        private SqlCommand BuildTravelCommand(SqlConnection conn, string sql, bool includeId = false, int id = 0)
+        {
+            var cmd = new SqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("@u", cmbAssignedUser.Text);
+            cmd.Parameters.AddWithValue("@co", txtCountry.Text.Trim());
+            cmd.Parameters.AddWithValue("@ci", txtCity.Text.Trim());
+            cmd.Parameters.AddWithValue("@dep", txtDepartureCity.Text.Trim());
+            cmd.Parameters.AddWithValue("@depStreet", txtDepartureStreet.Text.Trim());
+            cmd.Parameters.AddWithValue("@depDate", dtpDepartureDate.Value.Date);
+            cmd.Parameters.AddWithValue("@depTime", txtDepartureTime.Text.Trim());
+            cmd.Parameters.AddWithValue("@flightNum", txtFlightNumber.Text.Trim());
+            cmd.Parameters.AddWithValue("@terminal", txtTerminal.Text.Trim());
+            cmd.Parameters.AddWithValue("@transfer", txtTransferCity.Text.Trim());
+            cmd.Parameters.AddWithValue("@tr", cmbTransport.Text);
+            cmd.Parameters.AddWithValue("@b", numBudget.Value);
+            cmd.Parameters.AddWithValue("@mp", numMarketPrice.Value);
+            cmd.Parameters.AddWithValue("@s", cmbStatus.Text);
+            cmd.Parameters.AddWithValue("@ad", (int)numAdults.Value);
+            cmd.Parameters.AddWithValue("@ch", (int)numChildren.Value);
+            cmd.Parameters.AddWithValue("@ni", (int)numNights.Value);
+            cmd.Parameters.AddWithValue("@bt", cmbBoard.Text);
+            cmd.Parameters.AddWithValue("@hn", txtHotel.Text);
+            if (includeId) cmd.Parameters.AddWithValue("@id", id);
+            return cmd;
         }
 
         // ══════════════════════════════════════════
@@ -497,7 +700,6 @@ namespace WayPoint
                 ToggleAddMode(true);
                 return;
             }
-
             if (!ValidateInputs()) return;
 
             try
@@ -505,24 +707,14 @@ namespace WayPoint
                 using (var conn = DatabaseService.GetConnection())
                 {
                     var sql = @"INSERT INTO Travels 
-                        ([User],Country,City,DepartureCity,TransportType,Budget,MarketPrice,
-                         [Status],Adults,Nights,BoardType,HotelName,Rating,Comment)
+                        ([User],Country,City,DepartureCity,DepartureStreet,DepartureDate,DepartureTime,
+                         FlightNumber,TerminalOrStation,TransferCity,TransportType,
+                         Budget,MarketPrice,[Status],Adults,Children,Nights,BoardType,HotelName,Rating,Comment)
                         VALUES
-                        (@u,@co,@ci,@dep,@tr,@b,@mp,@s,@ad,@ni,@bt,@hn,1,'')";
-                    var cmd = new SqlCommand(sql, conn);
-                    cmd.Parameters.AddWithValue("@u", cmbAssignedUser.Text);
-                    cmd.Parameters.AddWithValue("@co", txtCountry.Text);
-                    cmd.Parameters.AddWithValue("@ci", txtCity.Text);
-                    cmd.Parameters.AddWithValue("@dep", txtDepartureCity.Text);
-                    cmd.Parameters.AddWithValue("@tr", cmbTransport.Text);
-                    cmd.Parameters.AddWithValue("@b", numBudget.Value);
-                    cmd.Parameters.AddWithValue("@mp", numMarketPrice.Value);
-                    cmd.Parameters.AddWithValue("@s", cmbStatus.Text);
-                    cmd.Parameters.AddWithValue("@ad", (int)numAdults.Value);
-                    cmd.Parameters.AddWithValue("@ni", (int)numNights.Value);
-                    cmd.Parameters.AddWithValue("@bt", cmbBoard.Text);
-                    cmd.Parameters.AddWithValue("@hn", txtHotel.Text);
-                    cmd.ExecuteNonQuery();
+                        (@u,@co,@ci,@dep,@depStreet,@depDate,@depTime,
+                         @flightNum,@terminal,@transfer,@tr,
+                         @b,@mp,@s,@ad,@ch,@ni,@bt,@hn,1,'')";
+                    BuildTravelCommand(conn, sql).ExecuteNonQuery();
                 }
                 LoadDataFromDatabase();
                 ToggleAddMode(false);
@@ -533,8 +725,7 @@ namespace WayPoint
                 ClearFields();
                 isUpdatingFromGrid = false;
 
-                MessageBox.Show("Тур успішно створено!", "Успіх",
-                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Тур успішно створено!", "Успіх", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex) { MessageBox.Show("Помилка додавання: " + ex.Message); }
         }
@@ -551,29 +742,16 @@ namespace WayPoint
                 using (var conn = DatabaseService.GetConnection())
                 {
                     var sql = @"UPDATE Travels SET
-                        [User]=@u,Country=@co,City=@ci,DepartureCity=@dep,TransportType=@tr,
+                        [User]=@u,Country=@co,City=@ci,DepartureCity=@dep,DepartureStreet=@depStreet,
+                        DepartureDate=@depDate,DepartureTime=@depTime,FlightNumber=@flightNum,
+                        TerminalOrStation=@terminal,TransferCity=@transfer,TransportType=@tr,
                         Budget=@b,MarketPrice=@mp,[Status]=@s,
-                        Adults=@ad,Nights=@ni,BoardType=@bt,HotelName=@hn
+                        Adults=@ad,Children=@ch,Nights=@ni,BoardType=@bt,HotelName=@hn
                         WHERE ID=@id";
-                    var cmd = new SqlCommand(sql, conn);
-                    cmd.Parameters.AddWithValue("@u", cmbAssignedUser.Text);
-                    cmd.Parameters.AddWithValue("@co", txtCountry.Text);
-                    cmd.Parameters.AddWithValue("@ci", txtCity.Text);
-                    cmd.Parameters.AddWithValue("@dep", txtDepartureCity.Text);
-                    cmd.Parameters.AddWithValue("@tr", cmbTransport.Text);
-                    cmd.Parameters.AddWithValue("@b", numBudget.Value);
-                    cmd.Parameters.AddWithValue("@mp", numMarketPrice.Value);
-                    cmd.Parameters.AddWithValue("@s", cmbStatus.Text);
-                    cmd.Parameters.AddWithValue("@ad", (int)numAdults.Value);
-                    cmd.Parameters.AddWithValue("@ni", (int)numNights.Value);
-                    cmd.Parameters.AddWithValue("@bt", cmbBoard.Text);
-                    cmd.Parameters.AddWithValue("@hn", txtHotel.Text);
-                    cmd.Parameters.AddWithValue("@id", id);
-                    cmd.ExecuteNonQuery();
+                    BuildTravelCommand(conn, sql, true, id).ExecuteNonQuery();
                 }
                 LoadDataFromDatabase();
-                MessageBox.Show("Дані туру оновлено!", "Успіх",
-                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Дані туру оновлено!", "Успіх", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex) { MessageBox.Show("Помилка оновлення: " + ex.Message); }
         }
@@ -591,7 +769,6 @@ namespace WayPoint
                     new SqlCommand($"DELETE FROM Travels WHERE ID={id}", conn).ExecuteNonQuery();
                 }
                 LoadDataFromDatabase();
-
                 isUpdatingFromGrid = true;
                 dgvData.ClearSelection();
                 ClearFields();
@@ -605,7 +782,6 @@ namespace WayPoint
         {
             if (isAddingMode)
             {
-                // В режимі додавання — це кнопка "Скасувати"
                 ToggleAddMode(false);
                 isUpdatingFromGrid = true;
                 dgvData.ClearSelection();
@@ -614,7 +790,6 @@ namespace WayPoint
                 isUpdatingFromGrid = false;
                 return;
             }
-
             isUpdatingFromGrid = true;
             dgvData.ClearSelection();
             ClearFields();
@@ -644,22 +819,13 @@ namespace WayPoint
         }
 
         private void btnAdminReturn_Click(object sender, EventArgs e)
-        {
-            if (!CheckUnsavedChanges()) return;
-            this.Close();
-        }
+        { if (!CheckUnsavedChanges()) return; this.Close(); }
 
         private void pbBack_Click(object sender, EventArgs e)
-        {
-            if (!CheckUnsavedChanges()) return;
-            this.Close();
-        }
+        { if (!CheckUnsavedChanges()) return; this.Close(); }
 
         private void pbExit_Click(object sender, EventArgs e)
-        {
-            if (!CheckUnsavedChanges()) return;
-            Application.Exit();
-        }
+        { if (!CheckUnsavedChanges()) return; Application.Exit(); }
 
         private void pnlHeader_MouseDown(object sender, MouseEventArgs e)
         { dragging = true; dragCursorPoint = Cursor.Position; dragFormPoint = this.Location; }
@@ -668,9 +834,7 @@ namespace WayPoint
         private void pnlHeader_MouseUp(object sender, MouseEventArgs e) => dragging = false;
     }
 
-    // ══════════════════════════════════════════
-    // ДОВІДНИК ГОТЕЛІВ
-    // ══════════════════════════════════════════
+    // HotelDictionaryForm залишається без змін — вона вже ідеальна
     public class HotelDictionaryForm : Form
     {
         public string SelectedHotelName { get; private set; }
@@ -680,7 +844,6 @@ namespace WayPoint
         private DataGridView dgv;
         private TextBox txtName, txtAddress;
         private NumericUpDown numStars, numPrice;
-        private bool isEditingExisting = false;
 
         public HotelDictionaryForm(string country, string city)
         {
@@ -698,7 +861,6 @@ namespace WayPoint
 
         private void BuildUI()
         {
-            // ===== ЛІВА ПАНЕЛЬ (форма реєстрації) =====
             var pnlLeft = new Panel
             {
                 Location = new Point(10, 10),
@@ -707,52 +869,30 @@ namespace WayPoint
                 BorderStyle = BorderStyle.FixedSingle
             };
 
-            var lblFormTitle = new Label
+            pnlLeft.Controls.Add(new Label
             {
                 Text = "Реєстрація готелю",
                 Font = new Font("Segoe UI", 11, FontStyle.Bold),
                 Location = new Point(10, 10),
                 AutoSize = true
-            };
-            pnlLeft.Controls.Add(lblFormTitle);
+            });
 
-            // Назва
             pnlLeft.Controls.Add(new Label { Text = "Назва готелю *", Location = new Point(10, 45), AutoSize = true, ForeColor = Color.Gray, Font = new Font("Segoe UI", 9) });
             txtName = new TextBox { Location = new Point(10, 63), Size = new Size(225, 25), Font = new Font("Segoe UI", 10), MaxLength = 200 };
             pnlLeft.Controls.Add(txtName);
 
-            // Адреса
-            pnlLeft.Controls.Add(new Label { Text = "Вулиця / район", Location = new Point(10, 100), AutoSize = true, ForeColor = Color.Gray, Font = new Font("Segoe UI", 9) });
+            pnlLeft.Controls.Add(new Label { Text = "Адреса / район", Location = new Point(10, 100), AutoSize = true, ForeColor = Color.Gray, Font = new Font("Segoe UI", 9) });
             txtAddress = new TextBox { Location = new Point(10, 118), Size = new Size(225, 25), Font = new Font("Segoe UI", 10), MaxLength = 300 };
             pnlLeft.Controls.Add(txtAddress);
 
-            // Зірки
             pnlLeft.Controls.Add(new Label { Text = "Зірки (1–5)", Location = new Point(10, 155), AutoSize = true, ForeColor = Color.Gray, Font = new Font("Segoe UI", 9) });
-            numStars = new NumericUpDown
-            {
-                Location = new Point(10, 173),
-                Size = new Size(100, 25),
-                Minimum = 1,
-                Maximum = 5,
-                Value = 4,
-                Font = new Font("Segoe UI", 10)
-            };
+            numStars = new NumericUpDown { Location = new Point(10, 173), Size = new Size(100, 25), Minimum = 1, Maximum = 5, Value = 4, Font = new Font("Segoe UI", 10) };
             pnlLeft.Controls.Add(numStars);
 
-            // Ціна
             pnlLeft.Controls.Add(new Label { Text = "Ціна за 1 ніч ($) *", Location = new Point(10, 210), AutoSize = true, ForeColor = Color.Gray, Font = new Font("Segoe UI", 9) });
-            numPrice = new NumericUpDown
-            {
-                Location = new Point(10, 228),
-                Size = new Size(225, 25),
-                Minimum = 1,
-                Maximum = 100000,
-                Value = 50,
-                Font = new Font("Segoe UI", 10)
-            };
+            numPrice = new NumericUpDown { Location = new Point(10, 228), Size = new Size(225, 25), Minimum = 1, Maximum = 100000, Value = 50, Font = new Font("Segoe UI", 10) };
             pnlLeft.Controls.Add(numPrice);
 
-            // Кнопка зберегти
             var btnSave = new Button
             {
                 Text = "💾 Зберегти готель",
@@ -766,7 +906,6 @@ namespace WayPoint
             btnSave.Click += BtnSave_Click;
             pnlLeft.Controls.Add(btnSave);
 
-            // Кнопка скинути форму (новий готель)
             var btnNew = new Button
             {
                 Text = "✚ Новий готель",
@@ -779,18 +918,12 @@ namespace WayPoint
             };
             btnNew.Click += (s, e) =>
             {
-                isEditingExisting = false;
-                txtName.Clear();
-                txtAddress.Clear();
-                numStars.Value = 4;
-                numPrice.Value = 50;
-                dgv.ClearSelection();
-                txtName.Focus();
-                lblFormTitle.Text = "Реєстрація готелю";
+                txtName.Clear(); txtAddress.Clear();
+                numStars.Value = 4; numPrice.Value = 50;
+                dgv.ClearSelection(); txtName.Focus();
             };
             pnlLeft.Controls.Add(btnNew);
 
-            // Кнопка видалити
             var btnDelete = new Button
             {
                 Text = "🗑 Видалити обраний",
@@ -804,11 +937,10 @@ namespace WayPoint
             btnDelete.Click += BtnDelete_Click;
             pnlLeft.Controls.Add(btnDelete);
 
-            // Підказка
             pnlLeft.Controls.Add(new Label
             {
-                Text = $"Місто: {city}\nКраїна: {country}",
-                Location = new Point(10, 415),
+                Text = $"📍 {city}, {country}",
+                Location = new Point(10, 420),
                 AutoSize = true,
                 ForeColor = Color.Gray,
                 Font = new Font("Segoe UI", 8)
@@ -816,7 +948,6 @@ namespace WayPoint
 
             this.Controls.Add(pnlLeft);
 
-            // ===== ПРАВА ЧАСТИНА (таблиця) =====
             dgv = new DataGridView
             {
                 Location = new Point(275, 10),
@@ -835,10 +966,7 @@ namespace WayPoint
             dgv.ColumnHeadersDefaultCellStyle.SelectionForeColor = Color.Black;
             dgv.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 10, FontStyle.Bold);
             dgv.SelectionChanged += Dgv_SelectionChanged;
-            dgv.CellDoubleClick += (s, e) =>
-            {
-                if (e.RowIndex >= 0) BtnSelect_Click(s, e);
-            };
+            dgv.CellDoubleClick += (s, e) => { if (e.RowIndex >= 0) BtnSelect_Click(s, e); };
 
             dgv.Columns.Add(new DataGridViewTextBoxColumn { Name = "ID", Visible = false });
             dgv.Columns.Add(new DataGridViewTextBoxColumn { Name = "Name", HeaderText = "Готель", FillWeight = 38 });
@@ -848,7 +976,6 @@ namespace WayPoint
 
             this.Controls.Add(dgv);
 
-            // Кнопки внизу справа
             var btnSelect = new Button
             {
                 Text = "✅ Обрати для туру",
@@ -872,17 +999,12 @@ namespace WayPoint
                 FlatStyle = FlatStyle.Flat,
                 Font = new Font("Segoe UI", 11)
             };
-            btnCancel.Click += (s, e) =>
-            {
-                this.DialogResult = DialogResult.Cancel;
-                this.Close();
-            };
+            btnCancel.Click += (s, e) => { this.DialogResult = DialogResult.Cancel; this.Close(); };
             this.Controls.Add(btnCancel);
 
-            // Підказка про подвійний клік
             this.Controls.Add(new Label
             {
-                Text = "💡 Подвійний клік по рядку — обрати готель",
+                Text = "💡 Подвійний клік — обрати готель",
                 Location = new Point(275, 495),
                 AutoSize = true,
                 ForeColor = Color.Gray,
@@ -898,8 +1020,7 @@ namespace WayPoint
                 using (var conn = DatabaseService.GetConnection())
                 {
                     var cmd = new SqlCommand(
-                        "SELECT * FROM HotelsDictionary WHERE Country=@co AND City=@ci ORDER BY Stars DESC, Name",
-                        conn);
+                        "SELECT * FROM HotelsDictionary WHERE Country=@co AND City=@ci ORDER BY Stars DESC, Name", conn);
                     cmd.Parameters.AddWithValue("@co", country);
                     cmd.Parameters.AddWithValue("@ci", city);
                     using (var reader = cmd.ExecuteReader())
@@ -924,7 +1045,6 @@ namespace WayPoint
         private void Dgv_SelectionChanged(object sender, EventArgs e)
         {
             if (dgv.SelectedRows.Count == 0) return;
-            isEditingExisting = true;
             txtName.Text = dgv.SelectedRows[0].Cells["Name"].Value?.ToString() ?? "";
             txtAddress.Text = dgv.SelectedRows[0].Cells["Address"].Value?.ToString() ?? "";
             string starsStr = dgv.SelectedRows[0].Cells["Stars"].Value?.ToString() ?? "★★★★";
@@ -936,12 +1056,10 @@ namespace WayPoint
 
         private void BtnSave_Click(object sender, EventArgs e)
         {
-            // Валідація
             if (string.IsNullOrWhiteSpace(txtName.Text))
             { MessageBox.Show("Введіть назву готелю!", "Перевірка", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
-
             if (numPrice.Value <= 0)
-            { MessageBox.Show("Ціна за ніч має бути більше 0!", "Перевірка", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
+            { MessageBox.Show("Ціна має бути більше 0!", "Перевірка", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
 
             try
             {
@@ -956,7 +1074,6 @@ namespace WayPoint
 
                     if (existingId != null)
                     {
-                        // Оновлення існуючого
                         var upd = new SqlCommand(
                             "UPDATE HotelsDictionary SET Address=@a, Stars=@s, PricePerNight=@p WHERE ID=@id", conn);
                         upd.Parameters.AddWithValue("@a", txtAddress.Text.Trim());
@@ -968,10 +1085,8 @@ namespace WayPoint
                     }
                     else
                     {
-                        // Новий запис
                         var ins = new SqlCommand(
-                            "INSERT INTO HotelsDictionary (Country,City,Name,Address,Stars,PricePerNight) VALUES (@co,@ci,@n,@a,@s,@p)",
-                            conn);
+                            "INSERT INTO HotelsDictionary (Country,City,Name,Address,Stars,PricePerNight) VALUES (@co,@ci,@n,@a,@s,@p)", conn);
                         ins.Parameters.AddWithValue("@co", country);
                         ins.Parameters.AddWithValue("@ci", city);
                         ins.Parameters.AddWithValue("@n", txtName.Text.Trim());
@@ -979,50 +1094,40 @@ namespace WayPoint
                         ins.Parameters.AddWithValue("@s", (int)numStars.Value);
                         ins.Parameters.AddWithValue("@p", numPrice.Value);
                         ins.ExecuteNonQuery();
-                        MessageBox.Show("Готель додано до довідника!", "Успіх", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageBox.Show("Готель додано!", "Успіх", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                 }
                 LoadHotels();
             }
-            catch (Exception ex) { MessageBox.Show("Помилка збереження: " + ex.Message); }
+            catch (Exception ex) { MessageBox.Show("Помилка: " + ex.Message); }
         }
 
         private void BtnDelete_Click(object sender, EventArgs e)
         {
             if (dgv.SelectedRows.Count == 0)
-            { MessageBox.Show("Оберіть готель для видалення!", "Перевірка"); return; }
-
+            { MessageBox.Show("Оберіть готель для видалення!"); return; }
             string name = dgv.SelectedRows[0].Cells["Name"].Value?.ToString() ?? "";
-            if (MessageBox.Show($"Видалити готель «{name}» з довідника?", "Підтвердження",
+            if (MessageBox.Show($"Видалити «{name}»?", "Підтвердження",
                 MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.No) return;
-
             try
             {
                 int id = Convert.ToInt32(dgv.SelectedRows[0].Cells["ID"].Value);
                 using (var conn = DatabaseService.GetConnection())
-                {
                     new SqlCommand($"DELETE FROM HotelsDictionary WHERE ID={id}", conn).ExecuteNonQuery();
-                }
                 LoadHotels();
-                txtName.Clear();
-                txtAddress.Clear();
-                numStars.Value = 4;
-                numPrice.Value = 50;
-                isEditingExisting = false;
+                txtName.Clear(); txtAddress.Clear();
             }
-            catch (Exception ex) { MessageBox.Show("Помилка видалення: " + ex.Message); }
+            catch (Exception ex) { MessageBox.Show("Помилка: " + ex.Message); }
         }
 
         private void BtnSelect_Click(object sender, EventArgs e)
         {
             if (dgv.SelectedRows.Count == 0)
             { MessageBox.Show("Оберіть готель зі списку!", "Перевірка", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
-
             SelectedHotelName = dgv.SelectedRows[0].Cells["Name"].Value?.ToString() ?? "";
             string priceStr = dgv.SelectedRows[0].Cells["Price"].Value?.ToString().Replace("$", "") ?? "0";
             decimal.TryParse(priceStr, out decimal price);
             SelectedPricePerNight = price;
-
             this.DialogResult = DialogResult.OK;
             this.Close();
         }

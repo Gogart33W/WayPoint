@@ -17,11 +17,13 @@ namespace WayPoint
 
         private decimal currentHotelPricePerNight = 0m;
         private bool isAddingMode = false;
+        private System.Windows.Forms.Timer badgeTimer;
 
         public MainWork()
         {
             InitializeComponent();
 
+            SoundHelper.AttachSounds(this);
             numMarketPrice.Maximum = 1000000m;
             numBudget.Maximum = 1000000m;
             numNights.Maximum = 365m;
@@ -30,8 +32,42 @@ namespace WayPoint
             numNights.Minimum = 1m;
             numAdults.Minimum = 1m;
 
+            // Відв'язуємо стандартні якорі, щоб форма не псувала кнопки при фулскріні
+            lblExit.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+            btnOpenFeed.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+            btnAdminReturn.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+            btnMessenger.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+
+            // Додаємо власну подію зміни розміру, яка ідеально розставить кнопки
+            this.Resize += MainWork_Resize;
+
             SetupDataTableStructure();
             BindEvents();
+        }
+
+        // === МАТЕМАТИЧНЕ ВИРІВНЮВАННЯ КНОПОК ===
+        private void MainWork_Resize(object sender, EventArgs e)
+        {
+            if (pnlHeader != null)
+            {
+                lblExit.Left = pnlHeader.Width - 40;
+                int currentRightEdge = lblExit.Left - 20;
+
+                if (btnOpenFeed.Visible)
+                {
+                    btnOpenFeed.Left = currentRightEdge - btnOpenFeed.Width;
+                    currentRightEdge = btnOpenFeed.Left - 20;
+                }
+                if (btnAdminReturn.Visible)
+                {
+                    btnAdminReturn.Left = currentRightEdge - btnAdminReturn.Width;
+                    currentRightEdge = btnAdminReturn.Left - 20;
+                }
+                if (btnMessenger.Visible)
+                {
+                    btnMessenger.Left = currentRightEdge - btnMessenger.Width;
+                }
+            }
         }
 
         private void BindEvents()
@@ -50,11 +86,9 @@ namespace WayPoint
             txtHotel.Click += (s, e) => OpenHotelDictionary();
             txtHotel.Cursor = Cursors.Hand;
 
-            // ФІКС МАСКИ ЧАСУ (Курсор завжди на початок)
             txtDepartureTime.Click += Mask_Click;
             txtTransferTime.Click += Mask_Click;
 
-            // ФІКС ВУЛИЦЬ (Авто-формат "Вул. Назва")
             txtDepartureStreet.Leave += FormatStreet_Leave;
             txtTransferStreet.Leave += FormatStreet_Leave;
         }
@@ -83,11 +117,28 @@ namespace WayPoint
         private void MainWork_Load(object sender, EventArgs e)
         {
             lblTitle.Text = $"WayPoint Business | {Session.Username}";
-            btnAdminReturn.Visible = (Session.Role == "Admin");
+
+            string role = (Session.Role ?? "").Trim();
+            bool isAdmin = role.Equals("Admin", StringComparison.OrdinalIgnoreCase);
+
+            // ЛОГІКА ДОСТУПУ
+            btnAdminReturn.Visible = isAdmin;
+            btnMessenger.Visible = !isAdmin; // Працівник БАЧИТЬ месенджер, Адмін НІ
+
+            // Оновлюємо дизайн кнопок після зміни видимості
+            MainWork_Resize(this, EventArgs.Empty);
+
+            if (!isAdmin)
+            {
+                badgeTimer = new System.Windows.Forms.Timer { Interval = 3000 };
+                badgeTimer.Tick += (s, ev) => UpdateMessengerBadge();
+                badgeTimer.Start();
+                UpdateMessengerBadge();
+            }
 
             dtpDepartureDate.MinDate = DateTime.Today;
 
-            LoadUsersToCombo(); // Завантажить тільки клієнтів!
+            LoadUsersToCombo();
             LoadDataFromDatabase();
 
             isUpdatingFromGrid = true;
@@ -98,6 +149,33 @@ namespace WayPoint
 
             AutoCalculateMarketPrice();
             UpdateLogisticsVisibility();
+        }
+
+        private void UpdateMessengerBadge()
+        {
+            try
+            {
+                using (var conn = DatabaseService.GetConnection())
+                {
+                    if (conn.State != ConnectionState.Open) conn.Open();
+
+                    string sql = "SELECT COUNT(*) FROM Messages WHERE ReceiverUsername='Support' AND IsRead=0";
+                    var cmd = new SqlCommand(sql, conn);
+                    int count = (int)cmd.ExecuteScalar();
+
+                    if (count > 0)
+                    {
+                        btnMessenger.Text = $"💬 Месенджер ({count})";
+                        btnMessenger.BackColor = Color.Crimson;
+                    }
+                    else
+                    {
+                        btnMessenger.Text = "💬 Месенджер";
+                        btnMessenger.BackColor = Color.FromArgb(59, 130, 246);
+                    }
+                }
+            }
+            catch { }
         }
 
         private void UpdateLogisticsVisibility()
@@ -127,9 +205,6 @@ namespace WayPoint
             }
         }
 
-        // ══════════════════════════════════════════
-        // ЛОГІКА РЕЖИМІВ ТА КНОПОК
-        // ══════════════════════════════════════════
         private void SetInputFieldsState(bool enabled)
         {
             txtCountry.Enabled = enabled; txtCity.Enabled = enabled;
@@ -160,7 +235,7 @@ namespace WayPoint
             if (enable)
             {
                 btnAdd.Text = "✅ Підтвердити";
-                btnCancelAdd.Visible = true; // Показуємо кнопку "Скасувати"
+                btnCancelAdd.Visible = true;
                 btnEdit.Visible = false;
                 btnDelete.Visible = false;
                 btnClear.Visible = false;
@@ -176,7 +251,7 @@ namespace WayPoint
             else
             {
                 btnAdd.Text = "➕ Створити";
-                btnCancelAdd.Visible = false; // Ховаємо
+                btnCancelAdd.Visible = false;
                 btnEdit.Visible = true;
                 btnDelete.Visible = true;
                 btnClear.Visible = true;
@@ -232,6 +307,32 @@ namespace WayPoint
             return true;
         }
 
+        // === ВАЛІДАЦІЯ ЧАСУ (00:00 - 23:59 ТА ПЕРЕВІРКА МИНУЛОГО ЧАСУ) ===
+        private bool ValidateTimeField(MaskedTextBox mask, DateTime? dateToCheck, string fieldName, TabPage errorTab)
+        {
+            string rawText = mask.Text.Replace(":", "").Replace("_", "").Trim();
+            if (rawText.Length == 0) return true; // Поле не обов'язкове
+
+            // TimeSpan.TryParse успішно парсить "25:00" як 1 день 1 годину, тому забороняємо >= 1 день
+            if (!TimeSpan.TryParse(mask.Text, out TimeSpan parsedTime) || parsedTime.TotalDays >= 1)
+            {
+                MessageBox.Show($"Некоректний час '{fieldName}'! Формат має бути від 00:00 до 23:59.", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                tabControlInfo.SelectedTab = errorTab;
+                return false;
+            }
+
+            if (dateToCheck.HasValue && dateToCheck.Value.Date == DateTime.Today)
+            {
+                if (parsedTime < DateTime.Now.TimeOfDay)
+                {
+                    MessageBox.Show($"Час '{fieldName}' не може бути в минулому для сьогоднішньої дати!", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    tabControlInfo.SelectedTab = errorTab;
+                    return false;
+                }
+            }
+            return true;
+        }
+
         private bool ValidateInputs()
         {
             if (string.IsNullOrWhiteSpace(txtCountry.Text)) { MessageBox.Show("Вкажіть країну!", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Warning); tabControlInfo.SelectedTab = tabRoute; return false; }
@@ -240,11 +341,9 @@ namespace WayPoint
             if (cmbAssignedUser.SelectedIndex == -1 || string.IsNullOrWhiteSpace(cmbAssignedUser.Text)) { MessageBox.Show("Оберіть клієнта!", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Warning); tabControlInfo.SelectedTab = tabFinance; return false; }
             if (numBudget.Value <= 0) { MessageBox.Show("Вкажіть вашу ціну (бюджет)!", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Warning); tabControlInfo.SelectedTab = tabFinance; return false; }
 
-            string time = txtDepartureTime.Text.Replace(":", "").Trim();
-            if (time.Length > 0 && time.Length < 4) { MessageBox.Show("Введіть коректний час відправлення (наприклад 14:30)!", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Warning); tabControlInfo.SelectedTab = tabLogistics; return false; }
-
-            string trTime = txtTransferTime.Text.Replace(":", "").Trim();
-            if (trTime.Length > 0 && trTime.Length < 4) { MessageBox.Show("Введіть коректний час пересадки!", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Warning); tabControlInfo.SelectedTab = tabLogistics; return false; }
+            // Перевіряємо обидва часи
+            if (!ValidateTimeField(txtDepartureTime, dtpDepartureDate.Value, "відправлення", tabLogistics)) return false;
+            if (!ValidateTimeField(txtTransferTime, null, "пересадки", tabLogistics)) return false;
 
             return true;
         }
@@ -345,9 +444,6 @@ namespace WayPoint
             }
         }
 
-        // ══════════════════════════════════════════
-        // БД — ЗАВАНТАЖЕННЯ / ЗБЕРІГАННЯ
-        // ══════════════════════════════════════════
         private void SetupDataTableStructure()
         {
             travelTable = new DataTable();
@@ -529,8 +625,6 @@ namespace WayPoint
                 cmbAssignedUser.Items.Clear();
                 using (var conn = DatabaseService.GetConnection())
                 {
-                    // Фільтруємо так, щоб брати лише звичайних користувачів
-                    // Заміни 'User' на ту назву ролі, яка відповідає клієнту в твоїй БД
                     var cmd = new SqlCommand("SELECT Username FROM Users WHERE Role = 'User'", conn);
                     using (var reader = cmd.ExecuteReader())
                     {
@@ -602,7 +696,6 @@ namespace WayPoint
                     cmd.ExecuteNonQuery();
                 }
 
-                // ФІКС БАГУ 3: ЗБЕРЕЖЕННЯ БЕЗ ПОМИЛОК
                 isUpdatingFromGrid = true;
                 LoadDataFromDatabase();
                 ToggleAddMode(false);
@@ -733,13 +826,28 @@ namespace WayPoint
             isUpdatingFromGrid = false;
         }
 
+        private void btnMessenger_Click(object sender, EventArgs e)
+        {
+            if (!CheckUnsavedChanges()) return;
+            this.Hide();
+            using (var messenger = new MessengerForm()) { messenger.ShowDialog(); }
+            this.Show();
+            UpdateMessengerBadge();
+        }
+
         private void btnAdminReturn_Click(object sender, EventArgs e) { if (!CheckUnsavedChanges()) return; this.Close(); }
-        private void pbBack_Click(object sender, EventArgs e) { if (!CheckUnsavedChanges()) return; this.Close(); }
-        private void pbExit_Click(object sender, EventArgs e) { if (!CheckUnsavedChanges()) return; Application.Exit(); }
+        private void lblBack_Click(object sender, EventArgs e) { if (!CheckUnsavedChanges()) return; this.Close(); }
+        private void lblExit_Click(object sender, EventArgs e) { if (!CheckUnsavedChanges()) return; Application.Exit(); }
 
         private void pnlHeader_MouseDown(object sender, MouseEventArgs e) { dragging = true; dragCursorPoint = Cursor.Position; dragFormPoint = this.Location; }
-        private void pnlHeader_MouseMove(object sender, MouseEventArgs e) { if (dragging) this.Location = Point.Add(dragFormPoint, new Size(Point.Subtract(Cursor.Position, new Size(dragCursorPoint)))); }
+        private void pnlHeader_MouseMove(object sender, MouseEventArgs e) { if (dragging && this.WindowState != FormWindowState.Maximized) this.Location = Point.Add(dragFormPoint, new Size(Point.Subtract(Cursor.Position, new Size(dragCursorPoint)))); }
         private void pnlHeader_MouseUp(object sender, MouseEventArgs e) => dragging = false;
+
+        protected override void OnFormClosed(FormClosedEventArgs e)
+        {
+            if (badgeTimer != null) { badgeTimer.Stop(); badgeTimer.Dispose(); }
+            base.OnFormClosed(e);
+        }
     }
 
     public class HotelDictionaryForm : Form
@@ -829,6 +937,8 @@ namespace WayPoint
             var btnSelect = new Button { Text = "✅ Обрати для туру", Location = new Point(270, 400), Size = new Size(250, 50), BackColor = Color.FromArgb(16, 185, 129), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 12, FontStyle.Bold) };
             btnSelect.Click += BtnSelect_Click;
             this.Controls.Add(btnSelect);
+
+            SoundHelper.AttachSounds(this); // ПІДКЛЮЧЕНО ЗВУК
         }
 
         private void LoadHotels()

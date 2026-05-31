@@ -13,7 +13,13 @@
     <Compile Update="Forms\MapForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="Forms\MessengerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="Forms\UserFeedForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Login.cs">
       <SubType>Form</SubType>
     </Compile>
   </ItemGroup>

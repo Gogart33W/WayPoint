@@ -1,8 +1,9 @@
-﻿using System;
+﻿using Microsoft.Web.WebView2.Core;
+using System;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
-using Microsoft.Web.WebView2.Core;
+using WayPoint.Services;
 
 namespace WayPoint
 {
@@ -24,6 +25,7 @@ namespace WayPoint
         public MapForm(string query)
         {
             InitializeComponent();
+            SoundHelper.AttachSounds(this); // ПІДКЛЮЧЕНО ЗВУК
             initialQuery = query;
             SetupUI();
 
@@ -37,9 +39,11 @@ namespace WayPoint
 
         private void SetupUI()
         {
+            // Задаємо базовий розмір для прорахунку, а потім розгортаємо на ВЕСЬ ЕКРАН
             this.Size = new Size(1100, 750);
+            this.WindowState = FormWindowState.Maximized; // <--- РОБИТЬ ПОВНИЙ ЕКРАН
             this.FormBorderStyle = FormBorderStyle.None;
-            this.StartPosition = FormStartPosition.CenterParent;
+            this.StartPosition = FormStartPosition.CenterScreen;
             this.BackColor = Color.White;
 
             pnlHeader = new Panel { Dock = DockStyle.Top, Height = 55, BackColor = Color.FromArgb(31, 41, 55) };
@@ -60,19 +64,26 @@ namespace WayPoint
                 BackColor = Color.FromArgb(55, 65, 81),
                 FlatStyle = FlatStyle.Flat,
                 Size = new Size(140, 35),
-                Location = new Point(940, 10),
+                // Математичне вирівнювання: ширина форми мінус ширина кнопки і відступ
+                Location = new Point(this.Width - 155, 10),
                 Cursor = Cursors.Hand,
                 Font = new Font("Segoe UI", 9, FontStyle.Bold)
             };
             btnClose.FlatAppearance.BorderSize = 0;
-            btnClose.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnClose.Anchor = AnchorStyles.Top | AnchorStyles.Right; // Кнопка "приклеюється" до правого краю
             btnClose.Click += (s, e) => { this.DialogResult = DialogResult.Cancel; this.Close(); };
 
             Label lblBackIcon = new Label { Text = "🔙", Font = new Font("Segoe UI Emoji", 14), ForeColor = Color.White, Location = new Point(15, 12), AutoSize = true, Cursor = Cursors.Hand };
             lblBackIcon.Click += (s, e) => this.Close();
 
+            // Рух форми (заблоковано для повноекранного режиму, щоб не було глітчів)
             pnlHeader.MouseDown += (s, e) => { dragging = true; dragCursorPoint = Cursor.Position; dragFormPoint = this.Location; };
-            pnlHeader.MouseMove += (s, e) => { if (dragging) { this.Location = Point.Add(dragFormPoint, new Size(Point.Subtract(Cursor.Position, new Size(dragCursorPoint)))); } };
+            pnlHeader.MouseMove += (s, e) => {
+                if (dragging && this.WindowState != FormWindowState.Maximized)
+                {
+                    this.Location = Point.Add(dragFormPoint, new Size(Point.Subtract(Cursor.Position, new Size(dragCursorPoint))));
+                }
+            };
             pnlHeader.MouseUp += (s, e) => dragging = false;
 
             pnlHeader.Controls.Add(lblBackIcon);
@@ -110,7 +121,7 @@ namespace WayPoint
                 return;
             }
 
-            lblTitle.Text = "🌍 Оберіть локацію (Клікніть по міссту на карті)";
+            lblTitle.Text = "🌍 Оберіть локацію (Клікніть по місту на карті)";
 
             string[] htmlLines = new string[]
             {

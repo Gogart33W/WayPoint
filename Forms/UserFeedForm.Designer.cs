@@ -20,6 +20,7 @@ namespace WayPoint
         {
             this.pnlHeader = new System.Windows.Forms.Panel();
             this.lblTitle = new System.Windows.Forms.Label();
+            this.btnMessenger = new System.Windows.Forms.Button(); // НОВА КНОПКА
             this.lblBack = new System.Windows.Forms.Label();
             this.lblExit = new System.Windows.Forms.Label();
             this.tabControlFeed = new System.Windows.Forms.TabControl();
@@ -38,6 +39,7 @@ namespace WayPoint
             // pnlHeader
             // 
             this.pnlHeader.BackColor = System.Drawing.Color.FromArgb(44, 62, 80);
+            this.pnlHeader.Controls.Add(this.btnMessenger); // ДОДАЛИ НА ПАНЕЛЬ
             this.pnlHeader.Controls.Add(this.lblTitle);
             this.pnlHeader.Controls.Add(this.lblBack);
             this.pnlHeader.Controls.Add(this.lblExit);
@@ -58,6 +60,19 @@ namespace WayPoint
             this.lblTitle.Name = "lblTitle";
             this.lblTitle.Size = new System.Drawing.Size(207, 31);
             this.lblTitle.Text = "Стрічка WayPoint";
+
+            // btnMessenger (Кнопка чату)
+            this.btnMessenger.BackColor = System.Drawing.Color.FromArgb(59, 130, 246);
+            this.btnMessenger.ForeColor = System.Drawing.Color.White;
+            this.btnMessenger.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnMessenger.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            this.btnMessenger.Location = new System.Drawing.Point(850, 12);
+            this.btnMessenger.Size = new System.Drawing.Size(160, 35);
+            this.btnMessenger.Text = "💬 Месенджер";
+            this.btnMessenger.FlatAppearance.BorderSize = 0;
+            this.btnMessenger.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.btnMessenger.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnMessenger.Click += new System.EventHandler(this.btnMessenger_Click);
 
             // lblBack
             this.lblBack.AutoSize = true;
@@ -91,7 +106,7 @@ namespace WayPoint
             // 
             this.tabControlFeed.Controls.Add(this.tabMyTrips);
             this.tabControlFeed.Controls.Add(this.tabGlobalFeed);
-            this.tabControlFeed.Dock = System.Windows.Forms.DockStyle.Fill; // ГУМОВИЙ НА ВЕСЬ ЕКРАН
+            this.tabControlFeed.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControlFeed.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
             this.tabControlFeed.Location = new System.Drawing.Point(0, 60);
             this.tabControlFeed.Name = "tabControlFeed";
@@ -142,7 +157,7 @@ namespace WayPoint
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1080, 680);
-            this.WindowState = System.Windows.Forms.FormWindowState.Maximized; // ПОВНИЙ ЕКРАН
+            this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Controls.Add(this.tabControlFeed);
             this.Controls.Add(this.pnlHeader);
@@ -163,6 +178,7 @@ namespace WayPoint
 
         private System.Windows.Forms.Panel pnlHeader;
         private System.Windows.Forms.Label lblTitle;
+        private System.Windows.Forms.Button btnMessenger;
         private System.Windows.Forms.Label lblBack;
         private System.Windows.Forms.Label lblExit;
         private System.Windows.Forms.TabControl tabControlFeed;

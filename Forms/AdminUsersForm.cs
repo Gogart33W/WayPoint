@@ -31,9 +31,6 @@ namespace WayPoint
         private string searchAdmins = string.Empty;
         private string searchUsers = string.Empty;
 
-        // Режим редагування стрічки (аналог isAddingMode у MainWork)
-        private bool isFeedEditMode = false;
-
         public AdminUsersForm()
         {
             InitializeComponent();
@@ -112,7 +109,6 @@ namespace WayPoint
 
         private void TxtSearchAdmins_Changed(object sender, EventArgs e)
         {
-            // Якщо плейсхолдер — не фільтруємо
             if (txtSearchAdmins?.ForeColor == Color.Gray) return;
             searchAdmins = (txtSearchAdmins?.Text ?? string.Empty).Trim();
             ApplyFilter(dgvAdminsWorkers, adminsWorkersTable, searchAdmins);
@@ -133,6 +129,7 @@ namespace WayPoint
         {
             try
             {
+                SoundHelper.AttachSounds(this); // ПІДКЛЮЧЕНО ЗВУК
                 LoadData();
                 EnterViewMode();
             }
@@ -154,11 +151,12 @@ namespace WayPoint
                 {
                     if (conn.State != ConnectionState.Open) conn.Open();
 
+                    // 1. Адміни та Працівники (Є колонка "Роль")
                     if (dgvAdminsWorkers != null)
                     {
                         SuspendGridEvents(dgvAdminsWorkers);
                         var dt = new DataTable();
-                        using (var da = new SqlDataAdapter("SELECT ID, Username, Email, Role FROM Users WHERE Role != 'User'", conn))
+                        using (var da = new SqlDataAdapter("SELECT ID, Username, Email, Role FROM Users WHERE Role IN ('Admin', 'Manager')", conn))
                             da.Fill(dt);
                         adminsWorkersTable = dt;
                         ApplyFilter(dgvAdminsWorkers, adminsWorkersTable, searchAdmins);
@@ -166,11 +164,12 @@ namespace WayPoint
                         ResumeGridEvents(dgvAdminsWorkers);
                     }
 
+                    // 2. Користувачі (Колонка "Роль" прихована, бо вона і так 'User')
                     if (dgvUsersOnly != null)
                     {
                         SuspendGridEvents(dgvUsersOnly);
                         var dt2 = new DataTable();
-                        using (var da2 = new SqlDataAdapter("SELECT ID, Username, Email, Role FROM Users WHERE Role = 'User'", conn))
+                        using (var da2 = new SqlDataAdapter("SELECT ID, Username, Email FROM Users WHERE Role = 'User'", conn))
                             da2.Fill(dt2);
                         usersTable = dt2;
                         ApplyFilter(dgvUsersOnly, usersTable, searchUsers);
@@ -219,39 +218,31 @@ namespace WayPoint
             }
         }
 
-        // Єдина точка налаштування колонок — викликається після кожного DataSource =
+        // Єдина точка налаштування колонок (залишив ТВІЙ код)
         private void SetupGridColumns(DataGridView dgv)
         {
             if (dgv?.Columns == null) return;
 
-            // 1. Спочатку ховаємо ID (по Name — він не змінюється)
             foreach (DataGridViewColumn c in dgv.Columns)
             {
                 if (c == null) continue;
-                c.Visible = !string.Equals(c.Name, "ID", StringComparison.OrdinalIgnoreCase);
+
+                if (string.Equals(c.Name, "ID", StringComparison.OrdinalIgnoreCase))
+                {
+                    c.Visible = false;
+                }
+                else
+                {
+                    c.Visible = true;
+                    c.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+                    c.FillWeight = 100f; // Всі колонки тепер однакової, нормальної ширини!
+                }
             }
 
-            // 2. Перейменовуємо заголовки (по Name)
             if (dgv.Columns.Contains("Username")) dgv.Columns["Username"].HeaderText = "Логін";
             if (dgv.Columns.Contains("Email")) dgv.Columns["Email"].HeaderText = "Електронна пошта";
             if (dgv.Columns.Contains("Role")) dgv.Columns["Role"].HeaderText = "Роль";
-
-            // 3. Ширини — тільки Fill, без Width/MinimumWidth щоб не крашилось
-            foreach (DataGridViewColumn c in dgv.Columns)
-            {
-                if (c == null || !c.Visible) continue;
-                try
-                {
-                    c.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-                    c.FillWeight = string.Equals(c.Name, "Role", StringComparison.OrdinalIgnoreCase) ? 25f : 100f;
-                }
-                catch { }
-            }
         }
-
-        private void LocalizeGridHeaders(DataGridView dgv) { } // залишаємо для сумісності, логіка в SetupGridColumns
-        private void HideColumnIfExists(DataGridView dgv, string colName) { } // залишаємо для сумісності
-        private void ApplyColumnWidths(DataGridView dgv) { } // залишаємо для сумісності
 
         #endregion
 
@@ -312,7 +303,7 @@ namespace WayPoint
 
             bool hasSelection = (dgvAdminsWorkers?.SelectedRows?.Count > 0) || (dgvUsersOnly?.SelectedRows?.Count > 0);
             SetSidebarEnabled(hasSelection);
-            // Зберегти і Видалити — активні тільки якщо обраний запис
+
             if (btnSave != null) btnSave.Enabled = hasSelection;
             if (btnDelete != null) btnDelete.Enabled = hasSelection;
             if (!hasSelection) ClearSidebar();
@@ -337,8 +328,13 @@ namespace WayPoint
             ClearGridSelectionSilently();
             ClearSidebar();
             SetSidebarEnabled(true);
-            if (btnSave != null) btnSave.Text = "Підтвердити";
-            if (btnDelete != null) btnDelete.Text = "Скасувати";
+
+            // ТУТ Я ДОДАВ РОЗБЛОКУВАННЯ КНОПОК ПРИ СТВОРЕННІ
+            if (btnSave != null) btnSave.Enabled = true;
+            if (btnDelete != null) btnDelete.Enabled = true;
+
+            if (btnSave != null) btnSave.Text = "✅ Підтвердити";
+            if (btnDelete != null) btnDelete.Text = "❌ Скасувати";
             if (btnNewAccount != null) { btnNewAccount.Enabled = false; btnNewAccount.Visible = false; }
             UpdateFeedButton();
             txtUsername?.Focus();
@@ -356,7 +352,6 @@ namespace WayPoint
             UpdateFeedButton();
         }
 
-        // Стрічка і Робочий простір — завжди активні
         private void UpdateFeedButton()
         {
             if (btnOpenFeed != null) btnOpenFeed.Enabled = true;
@@ -383,7 +378,6 @@ namespace WayPoint
 
             if (currentMode == Mode.Add)
             {
-                // Повідомлення завжди — незалежно від isDirty
                 if (isPrompting) return;
                 isPrompting = true;
                 var res = MessageBox.Show(
@@ -416,7 +410,13 @@ namespace WayPoint
             {
                 if (txtUsername != null) txtUsername.Text = GetCellValue(row, "Username");
                 if (txtEmail != null) txtEmail.Text = GetCellValue(row, "Email");
-                string role = GetCellValue(row, "Role");
+
+                string role = "User"; // Дефолтне значення для другої вкладки
+                if (row.DataGridView.Columns.Contains("Role"))
+                {
+                    role = GetCellValue(row, "Role");
+                }
+
                 string selectedUsername = GetCellValue(row, "Username");
                 if (cmbRole != null)
                 {
@@ -489,14 +489,11 @@ namespace WayPoint
             DeleteSelectedUser();
         }
 
-        // Робочий простір — завжди активна, відкриває MainWork
-        // Якщо обраний юзер — від його імені, інакше від імені поточного адміна
         private void btnOpenWork_Click(object sender, EventArgs e)
         {
             string username = GetSelectedUsername();
             string role = GetSelectedRole();
 
-            // Якщо нікого не обрано — відкриваємо від свого імені
             if (string.IsNullOrEmpty(username))
             {
                 username = GetSessionUsername();
@@ -521,7 +518,6 @@ namespace WayPoint
             }
         }
 
-        // Стрічка — відкривається від імені ПОТОЧНОГО авторизованого адміна
         private void btnOpenFeed_Click(object sender, EventArgs e)
         {
             this.Hide();
@@ -577,23 +573,27 @@ namespace WayPoint
                             return;
                         }
                     }
+
+                    string tempPassword = "WP" + GenerateVerificationCode();
+                    string hash = BCrypt.Net.BCrypt.HashPassword(tempPassword);
+
                     using (var cmd = new SqlCommand(
-                        "INSERT INTO Users (Username, Password, Role, Email, IsEmailVerified, VerificationCode, CodeExpiry) " +
-                        "VALUES (@u, @p, @r, @e, @v, @c, @exp)", conn))
+                        "INSERT INTO Users (Username, PasswordHash, Role, Email, IsEmailVerified, VerificationCode, CodeExpiry) " +
+                        "VALUES (@u, @p, @r, @e, 1, NULL, NULL)", conn))
                     {
                         cmd.Parameters.AddWithValue("@u", newUsername);
-                        cmd.Parameters.AddWithValue("@p", string.Empty);
+                        cmd.Parameters.AddWithValue("@p", hash);
                         cmd.Parameters.AddWithValue("@r", newRole);
                         cmd.Parameters.AddWithValue("@e", newEmail);
-                        cmd.Parameters.AddWithValue("@v", false);
-                        cmd.Parameters.AddWithValue("@c", GenerateVerificationCode());
-                        cmd.Parameters.AddWithValue("@exp", DateTime.UtcNow.AddHours(24));
                         cmd.ExecuteNonQuery();
                     }
+
+                    EmailService.SendPasswordReset(newEmail, tempPassword);
                 }
+
                 isDirty = false;
                 ExitAddMode(cancelled: false);
-                MessageBox.Show("Новий акаунт створено.", "Успіх", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Новий акаунт створено. Пароль відправлено на пошту.", "Успіх", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 LoadData();
             }
             catch (Exception ex)
@@ -627,7 +627,11 @@ namespace WayPoint
             }
 
             string selectedUsername = GetCellValue(selectedRow, "Username");
-            string oldRole = GetCellValue(selectedRow, "Role");
+            string oldRole = "User";
+            if (selectedRow.DataGridView.Columns.Contains("Role"))
+            {
+                oldRole = GetCellValue(selectedRow, "Role");
+            }
 
             if (string.Equals(selectedUsername, GetSessionUsername(), StringComparison.OrdinalIgnoreCase))
             {
@@ -728,8 +732,11 @@ namespace WayPoint
 
         private string GetSelectedRole()
         {
-            if (dgvAdminsWorkers?.SelectedRows?.Count > 0) return GetCellValue(dgvAdminsWorkers.SelectedRows[0], "Role");
-            if (dgvUsersOnly?.SelectedRows?.Count > 0) return GetCellValue(dgvUsersOnly.SelectedRows[0], "Role");
+            if (dgvAdminsWorkers?.SelectedRows?.Count > 0)
+            {
+                var row = dgvAdminsWorkers.SelectedRows[0];
+                if (row.DataGridView.Columns.Contains("Role")) return GetCellValue(row, "Role");
+            }
             return "User";
         }
 

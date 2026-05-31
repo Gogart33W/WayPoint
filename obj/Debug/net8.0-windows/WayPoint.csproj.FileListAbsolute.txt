@@ -119,3 +119,5 @@ E:\recov\Study\Kyrop\WayPoint\WayPoint\obj\Debug\net8.0-windows\refint\WayPoint.
 E:\recov\Study\Kyrop\WayPoint\WayPoint\obj\Debug\net8.0-windows\WayPoint.pdb
 E:\recov\Study\Kyrop\WayPoint\WayPoint\obj\Debug\net8.0-windows\WayPoint.genruntimeconfig.cache
 E:\recov\Study\Kyrop\WayPoint\WayPoint\obj\Debug\net8.0-windows\ref\WayPoint.dll
+E:\recov\Study\Kyrop\WayPoint\WayPoint\obj\Debug\net8.0-windows\WayPoint.MessengerForm.resources
+E:\recov\Study\Kyrop\WayPoint\WayPoint\obj\Debug\net8.0-windows\WayPoint.Login.resources

@@ -63,9 +63,9 @@ namespace WayPoint.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap free_icon_window_14062773 {
+        internal static System.Drawing.Bitmap profit_down {
             get {
-                object obj = ResourceManager.GetObject("free-icon-window-14062773", resourceCulture);
+                object obj = ResourceManager.GetObject("profit_down", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -73,9 +73,9 @@ namespace WayPoint.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap Home3_37171 {
+        internal static System.Drawing.Bitmap profit_up {
             get {
-                object obj = ResourceManager.GetObject("Home3_37171", resourceCulture);
+                object obj = ResourceManager.GetObject("profit_up", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

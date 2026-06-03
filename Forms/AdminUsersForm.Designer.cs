@@ -23,6 +23,7 @@ namespace WayPoint
         private Button btnNewAccount;
         private Button btnOpenWork;
         private Button btnOpenFeed;
+        private Button btnOpenAnalytics; // КНОПКА АНАЛІТИКИ
 
         private TabControl tabControl;
         private TabPage tabAdminsWorkers;
@@ -69,7 +70,6 @@ namespace WayPoint
             this.lblBack.Location = new Point(15, 12);
             this.lblBack.AutoSize = true;
             this.lblBack.Cursor = Cursors.Hand;
-            this.lblBack.Click += new EventHandler(this.btnBack_Click);
             this.lblBack.MouseEnter += (s, e) => this.lblBack.ForeColor = Color.White;
             this.lblBack.MouseLeave += (s, e) => this.lblBack.ForeColor = Color.LightGray;
 
@@ -80,7 +80,6 @@ namespace WayPoint
             this.lblExit.AutoSize = true;
             this.lblExit.Cursor = Cursors.Hand;
             this.lblExit.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            this.lblExit.Click += (s, e) => Application.Exit();
             this.lblExit.MouseEnter += (s, e) => this.lblExit.ForeColor = Color.White;
             this.lblExit.MouseLeave += (s, e) => this.lblExit.ForeColor = Color.LightGray;
 
@@ -137,7 +136,6 @@ namespace WayPoint
             this.btnSave.FlatStyle = FlatStyle.Flat;
             this.btnSave.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
             this.btnSave.Cursor = Cursors.Hand;
-            this.btnSave.Click += new EventHandler(this.btnSave_Click);
 
             this.btnDelete = new Button();
             this.btnDelete.Location = new Point(20, 337);
@@ -149,7 +147,6 @@ namespace WayPoint
             this.btnDelete.FlatStyle = FlatStyle.Flat;
             this.btnDelete.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
             this.btnDelete.Cursor = Cursors.Hand;
-            this.btnDelete.Click += new EventHandler(this.btnDelete_Click);
 
             this.btnNewAccount = new Button();
             this.btnNewAccount.Location = new Point(20, 389);
@@ -161,18 +158,16 @@ namespace WayPoint
             this.btnNewAccount.FlatStyle = FlatStyle.Flat;
             this.btnNewAccount.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
             this.btnNewAccount.Cursor = Cursors.Hand;
-            this.btnNewAccount.Click += new EventHandler(this.btnNewAccount_Click);
 
-            // --- Роздільник ---
             var sep = new Label();
             sep.BorderStyle = BorderStyle.Fixed3D;
             sep.Location = new Point(20, 443);
             sep.Size = new Size(275, 2);
 
-            AddLabel("Перегляд від імені", 452, this.pnlSidebar);
+            AddLabel("Перегляд від імені", 450, this.pnlSidebar);
 
             this.btnOpenWork = new Button();
-            this.btnOpenWork.Location = new Point(20, 477);
+            this.btnOpenWork.Location = new Point(20, 472);
             this.btnOpenWork.Size = new Size(275, 42);
             this.btnOpenWork.Text = "🖥 Робочий простір";
             this.btnOpenWork.BackColor = Color.FromArgb(107, 114, 128);
@@ -182,10 +177,9 @@ namespace WayPoint
             this.btnOpenWork.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
             this.btnOpenWork.Cursor = Cursors.Hand;
             this.btnOpenWork.Enabled = false;
-            this.btnOpenWork.Click += new EventHandler(this.btnOpenWork_Click);
 
             this.btnOpenFeed = new Button();
-            this.btnOpenFeed.Location = new Point(20, 529);
+            this.btnOpenFeed.Location = new Point(20, 520);
             this.btnOpenFeed.Size = new Size(275, 42);
             this.btnOpenFeed.Text = "📰 Стрічка користувача";
             this.btnOpenFeed.BackColor = Color.FromArgb(107, 114, 128);
@@ -194,8 +188,19 @@ namespace WayPoint
             this.btnOpenFeed.FlatStyle = FlatStyle.Flat;
             this.btnOpenFeed.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
             this.btnOpenFeed.Cursor = Cursors.Hand;
-            this.btnOpenFeed.Enabled = true; // керується через UpdateFeedButton
-            this.btnOpenFeed.Click += new EventHandler(this.btnOpenFeed_Click);
+            this.btnOpenFeed.Enabled = true;
+
+            // КНОПКА АНАЛІТИКИ
+            this.btnOpenAnalytics = new Button();
+            this.btnOpenAnalytics.Location = new Point(20, 568);
+            this.btnOpenAnalytics.Size = new Size(275, 42);
+            this.btnOpenAnalytics.Text = "📊 Аналітика";
+            this.btnOpenAnalytics.BackColor = Color.FromArgb(139, 92, 246);
+            this.btnOpenAnalytics.ForeColor = Color.White;
+            this.btnOpenAnalytics.FlatAppearance.BorderSize = 0;
+            this.btnOpenAnalytics.FlatStyle = FlatStyle.Flat;
+            this.btnOpenAnalytics.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
+            this.btnOpenAnalytics.Cursor = Cursors.Hand;
 
             this.pnlSidebar.Controls.Add(this.lblSidebarTitle);
             this.pnlSidebar.Controls.Add(this.txtUsername);
@@ -207,6 +212,7 @@ namespace WayPoint
             this.pnlSidebar.Controls.Add(sep);
             this.pnlSidebar.Controls.Add(this.btnOpenWork);
             this.pnlSidebar.Controls.Add(this.btnOpenFeed);
+            this.pnlSidebar.Controls.Add(this.btnOpenAnalytics);
 
             // ===== TAB CONTROL =====
             this.tabControl = new TabControl();
@@ -323,10 +329,6 @@ namespace WayPoint
             this.Controls.Add(this.pnlHeader);
             this.Controls.Add(this.pnlSidebar);
             this.Controls.Add(this.tabControl);
-
-            this.pnlHeader.MouseDown += new MouseEventHandler(this.pnlHeader_MouseDown);
-            this.pnlHeader.MouseMove += new MouseEventHandler(this.pnlHeader_MouseMove);
-            this.pnlHeader.MouseUp += new MouseEventHandler(this.pnlHeader_MouseUp);
 
             this.pnlHeader.ResumeLayout(false);
             this.pnlHeader.PerformLayout();

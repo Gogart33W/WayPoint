@@ -22,12 +22,18 @@ namespace WayPoint
         [System.Runtime.InteropServices.DllImport("Gdi32.dll", EntryPoint = "CreateRoundRectRgn")]
         public static extern IntPtr CreateRoundRectRgn(int nLeftRect, int nTopRect, int nRightRect, int nBottomRect, int nWidthEllipse, int nHeightEllipse);
 
-        public MessengerForm()
+        // ОНОВЛЕНО: Конструктор тепер приймає ім'я клієнта (по замовчуванню порожнє)
+        public MessengerForm(string targetUser = "")
         {
             InitializeComponent();
 
             typeof(FlowLayoutPanel).InvokeMember("DoubleBuffered", System.Reflection.BindingFlags.SetProperty | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic, null, flowChat, new object[] { true });
             typeof(FlowLayoutPanel).InvokeMember("DoubleBuffered", System.Reflection.BindingFlags.SetProperty | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic, null, flowContacts, new object[] { true });
+
+            if (!string.IsNullOrEmpty(targetUser))
+            {
+                selectedContact = targetUser;
+            }
 
             chatTimer = new System.Windows.Forms.Timer();
             chatTimer.Interval = 3000;
@@ -39,7 +45,7 @@ namespace WayPoint
 
         private void MessengerForm_Load(object sender, EventArgs e)
         {
-            SoundHelper.AttachSounds(this); // ПІДКЛЮЧЕННЯ ЗВУКІВ
+            SoundHelper.AttachSounds(this);
 
             if (Session.Role == "User")
             {
@@ -59,15 +65,21 @@ namespace WayPoint
             }
             else
             {
-                lblHeaderTitle.Text = $"Робоче місце: {Session.Username}";
+                // Якщо ми зайшли з конкретним клієнтом - одразу показуємо його в заголовку
+                lblHeaderTitle.Text = string.IsNullOrEmpty(selectedContact) ? $"Робоче місце: {Session.Username}" : $"Чат з клієнтом: {selectedContact}";
+
                 LoadContacts();
+                if (!string.IsNullOrEmpty(selectedContact))
+                {
+                    LoadChatHistory();
+                }
                 chatTimer.Start();
             }
         }
 
         private void txtSearchContacts_TextChanged(object sender, EventArgs e)
         {
-            LoadContacts(); // Перезавантажує список при кожному введеному символі
+            LoadContacts();
         }
 
         private void LoadContacts()
@@ -80,18 +92,20 @@ namespace WayPoint
                 {
                     if (conn.State != ConnectionState.Open) conn.Open();
 
-                    // ФІЛЬТР: Показує тільки тих клієнтів, які хоча б раз писали АБО яким писали, ПЛЮС працює пошук!
+                    // ОНОВЛЕНО: SQL-запит примусово витягує targeted клієнта, навіть якщо чат порожній
                     string sql = @"
                         SELECT u.Username, 
                                (SELECT COUNT(*) FROM Messages WHERE SenderUsername = u.Username AND ReceiverUsername = 'Support' AND IsRead = 0) AS Unread
                         FROM Users u
                         WHERE u.Role = 'User' 
-                          AND EXISTS (SELECT 1 FROM Messages WHERE SenderUsername = u.Username OR ReceiverUsername = u.Username)
+                          AND (EXISTS (SELECT 1 FROM Messages WHERE SenderUsername = u.Username OR ReceiverUsername = u.Username) 
+                               OR u.Username = @target)
                           AND u.Username LIKE @search
-                        ORDER BY Unread DESC, u.Username ASC"; // Спочатку непрочитані, потім за алфавітом
+                        ORDER BY Unread DESC, u.Username ASC";
 
                     var cmd = new SqlCommand(sql, conn);
                     cmd.Parameters.AddWithValue("@search", "%" + txtSearchContacts.Text.Trim() + "%");
+                    cmd.Parameters.AddWithValue("@target", string.IsNullOrEmpty(selectedContact) ? "" : selectedContact);
 
                     List<string> currentUsers = new List<string>();
 
@@ -139,7 +153,6 @@ namespace WayPoint
                         }
                     }
 
-                    // Видалення кнопок клієнтів, які не підпадають під пошук
                     List<Control> toRemove = new List<Control>();
                     foreach (Control c in flowContacts.Controls)
                     {
@@ -401,6 +414,7 @@ namespace WayPoint
                 txtMessage.Clear();
                 txtMessage.Focus();
                 LoadChatHistory();
+                LoadContacts(); // Оновлюємо ліве меню
             }
             catch (Exception ex) { MessageBox.Show("Помилка відправки: " + ex.Message); }
         }
@@ -420,7 +434,16 @@ namespace WayPoint
         private void lblExit_MouseLeave(object sender, EventArgs e) => lblExit.ForeColor = Color.LightGray;
 
         private void pnlHeader_MouseDown(object sender, MouseEventArgs e) { dragging = true; dragCursorPoint = Cursor.Position; dragFormPoint = this.Location; }
-        private void pnlHeader_MouseMove(object sender, MouseEventArgs e) { if (dragging && this.WindowState != FormWindowState.Maximized) this.Location = Point.Add(dragFormPoint, new Size(Point.Subtract(Cursor.Position, new Size(dragCursorPoint)))); }
+        private void pnlHeader_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (dragging && this.WindowState != FormWindowState.Maximized)
+            {
+                this.Location = new Point(
+                    dragFormPoint.X + Cursor.Position.X - dragCursorPoint.X,
+                    dragFormPoint.Y + Cursor.Position.Y - dragCursorPoint.Y
+                );
+            }
+        }
         private void pnlHeader_MouseUp(object sender, MouseEventArgs e) => dragging = false;
 
         protected override void OnFormClosed(FormClosedEventArgs e)

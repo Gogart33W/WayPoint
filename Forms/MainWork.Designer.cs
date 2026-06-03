@@ -13,19 +13,22 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-
             this.pnlHeader = new System.Windows.Forms.Panel();
             this.pnlSidebar = new System.Windows.Forms.Panel();
             this.pnlData = new System.Windows.Forms.Panel();
+            this.pnlFilters = new System.Windows.Forms.Panel(); // Змінено на звичайний Panel для жорстких розмірів
 
             this.btnAdminReturn = new System.Windows.Forms.Button();
             this.btnOpenFeed = new System.Windows.Forms.Button();
-            this.btnMessenger = new System.Windows.Forms.Button(); // НОВА КНОПКА МЕСЕНДЖЕРА
+            this.btnMessenger = new System.Windows.Forms.Button();
+            this.btnContactClient = new System.Windows.Forms.Button();
             this.lblTitle = new System.Windows.Forms.Label();
-            this.lblBack = new System.Windows.Forms.Label(); // ЗАМІНА PICTUREBOX
-            this.lblExit = new System.Windows.Forms.Label(); // ЗАМІНА PICTUREBOX
+            this.lblBack = new System.Windows.Forms.Label();
+            this.lblExit = new System.Windows.Forms.Label();
 
             this.lblSidebarTitle = new System.Windows.Forms.Label();
+            this.pbBenefitIcon = new System.Windows.Forms.PictureBox();
+
             this.tabControlInfo = new System.Windows.Forms.TabControl();
             this.tabRoute = new System.Windows.Forms.TabPage();
             this.tabLogistics = new System.Windows.Forms.TabPage();
@@ -39,6 +42,13 @@
 
             this.dgvData = new System.Windows.Forms.DataGridView();
             this.lblDataTitle = new System.Windows.Forms.Label();
+
+            // Фільтри та Пошук
+            this.lblFilterTitle = new System.Windows.Forms.Label();
+            this.cmbFilterTours = new System.Windows.Forms.ComboBox();
+            this.lblSearchTitle = new System.Windows.Forms.Label();
+            this.txtSearch = new System.Windows.Forms.TextBox();
+            this.lblFilterSpacer = new System.Windows.Forms.Label();
 
             // Поля Вкладка 1
             this.txtCountry = new System.Windows.Forms.TextBox();
@@ -73,6 +83,7 @@
 
             this.pnlHeader.SuspendLayout();
             this.pnlSidebar.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pbBenefitIcon)).BeginInit();
             this.tabControlInfo.SuspendLayout();
             this.tabRoute.SuspendLayout();
             this.tabLogistics.SuspendLayout();
@@ -83,6 +94,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.numMarketPrice)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numBudget)).BeginInit();
             this.pnlData.SuspendLayout();
+            this.pnlFilters.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvData)).BeginInit();
             this.SuspendLayout();
 
@@ -104,7 +116,7 @@
             this.lblTitle.AutoSize = true;
 
             // Кнопка Месенджер
-            this.btnMessenger.BackColor = System.Drawing.Color.FromArgb(59, 130, 246); // Синя
+            this.btnMessenger.BackColor = System.Drawing.Color.FromArgb(59, 130, 246);
             this.btnMessenger.ForeColor = System.Drawing.Color.White;
             this.btnMessenger.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnMessenger.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
@@ -113,7 +125,6 @@
             this.btnMessenger.Text = "💬 Месенджер";
             this.btnMessenger.FlatAppearance.BorderSize = 0;
             this.btnMessenger.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
-            this.btnMessenger.Click += new System.EventHandler(this.btnMessenger_Click);
 
             // Кнопка Адмінка
             this.btnAdminReturn.BackColor = System.Drawing.Color.FromArgb(220, 38, 38);
@@ -125,7 +136,6 @@
             this.btnAdminReturn.Text = "🛡️ Адмінка";
             this.btnAdminReturn.FlatAppearance.BorderSize = 0;
             this.btnAdminReturn.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
-            this.btnAdminReturn.Click += new System.EventHandler(this.btnAdminReturn_Click);
 
             // Кнопка Стрічка
             this.btnOpenFeed.BackColor = System.Drawing.Color.FromArgb(139, 92, 246);
@@ -137,18 +147,14 @@
             this.btnOpenFeed.Text = "🌍 Стрічка";
             this.btnOpenFeed.FlatAppearance.BorderSize = 0;
             this.btnOpenFeed.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
-            this.btnOpenFeed.Click += new System.EventHandler(this.btnOpenFeed_Click);
 
-            // lblBack (Заміна pbBack)
             this.lblBack.AutoSize = true;
             this.lblBack.Cursor = System.Windows.Forms.Cursors.Hand;
             this.lblBack.Font = new System.Drawing.Font("Segoe UI Emoji", 16F, System.Drawing.FontStyle.Bold);
             this.lblBack.ForeColor = System.Drawing.Color.LightGray;
             this.lblBack.Location = new System.Drawing.Point(15, 12);
             this.lblBack.Text = "🔙";
-            this.lblBack.Click += new System.EventHandler(this.lblBack_Click);
 
-            // lblExit (Заміна pbExit)
             this.lblExit.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.lblExit.AutoSize = true;
             this.lblExit.Cursor = System.Windows.Forms.Cursors.Hand;
@@ -156,9 +162,6 @@
             this.lblExit.ForeColor = System.Drawing.Color.LightGray;
             this.lblExit.Location = new System.Drawing.Point(1300, 12);
             this.lblExit.Text = "✕";
-            this.lblExit.Click += new System.EventHandler(this.lblExit_Click);
-            this.lblExit.MouseEnter += (s, e) => this.lblExit.ForeColor = System.Drawing.Color.Crimson;
-            this.lblExit.MouseLeave += (s, e) => this.lblExit.ForeColor = System.Drawing.Color.LightGray;
 
             // ===== SIDEBAR =====
             this.pnlSidebar.BackColor = System.Drawing.Color.White;
@@ -167,10 +170,20 @@
             this.pnlSidebar.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pnlSidebar.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
 
-            this.lblSidebarTitle.Text = "Новий тур";
+            this.lblSidebarTitle.Text = "Створення туру";
             this.lblSidebarTitle.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
             this.lblSidebarTitle.Location = new System.Drawing.Point(15, 10);
             this.lblSidebarTitle.AutoSize = true;
+
+            // Іконка вигоди
+            this.pbBenefitIcon.Size = new System.Drawing.Size(32, 32);
+            this.pbBenefitIcon.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pbBenefitIcon.BackColor = System.Drawing.Color.Transparent;
+            this.pbBenefitIcon.Visible = false;
+            this.pbBenefitIcon.Location = new System.Drawing.Point(280, 5);
+
+            this.pnlSidebar.Controls.Add(this.lblSidebarTitle);
+            this.pnlSidebar.Controls.Add(this.pbBenefitIcon);
 
             // --- TAB CONTROL ---
             this.tabControlInfo.Location = new System.Drawing.Point(10, 45);
@@ -191,7 +204,7 @@
             this.pnlSidebar.Controls.Add(this.tabControlInfo);
 
             // ----------------------------------------------------
-            // ВКЛАДКА 1: МАРШРУТ (УЩІЛЬНЕНО)
+            // ВКЛАДКА 1: МАРШРУТ 
             // ----------------------------------------------------
             AddLabel("Країна", 10, 10, tabRoute, System.Drawing.FontStyle.Regular);
             this.txtCountry.Location = new System.Drawing.Point(10, 28);
@@ -209,7 +222,6 @@
             this.btnOpenMap.Size = new System.Drawing.Size(35, 27);
             this.btnOpenMap.Text = "🗺";
             this.btnOpenMap.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnOpenMap.Click += new System.EventHandler(this.btnOpenMap_Click);
             this.tabRoute.Controls.Add(this.btnOpenMap);
 
             AddLabel("🏨 Готель (Довідник CRM)", 65, 10, tabRoute, System.Drawing.FontStyle.Bold);
@@ -244,7 +256,7 @@
             this.tabRoute.Controls.Add(this.cmbBoard);
 
             // ----------------------------------------------------
-            // ВКЛАДКА 2: ЛОГІСТИКА (УЩІЛЬНЕНО)
+            // ВКЛАДКА 2: ЛОГІСТИКА 
             // ----------------------------------------------------
             AddLabel("— ОСНОВНИЙ РЕЙС / ВІДПРАВЛЕННЯ —", 5, 10, tabLogistics, System.Drawing.FontStyle.Bold);
 
@@ -337,7 +349,7 @@
             this.tabFinance.Controls.Add(this.cmbAssignedUser);
 
             AddLabel("Статус туру", 70, 10, tabFinance, System.Drawing.FontStyle.Regular);
-            this.cmbStatus.Items.AddRange(new object[] { "Запит", "Планується", "Оплачено", "Завершено" });
+            this.cmbStatus.Items.AddRange(new object[] { "Запит", "Планується", "Оплачено", "Завершено", "Скасовано" });
             this.cmbStatus.Location = new System.Drawing.Point(10, 90);
             this.cmbStatus.Size = new System.Drawing.Size(290, 25);
             this.cmbStatus.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
@@ -358,7 +370,7 @@
             this.tabFinance.Controls.Add(this.numBudget);
 
             // ----------------------------------------------------
-            // КНОПКИ УПРАВЛІННЯ (Внизу, завжди видимі)
+            // КНОПКИ УПРАВЛІННЯ
             // ----------------------------------------------------
             this.btnAdd.Location = new System.Drawing.Point(10, 485);
             this.btnAdd.Size = new System.Drawing.Size(155, 45);
@@ -368,19 +380,17 @@
             this.btnAdd.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnAdd.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
             this.btnAdd.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
-            this.btnAdd.Click += new System.EventHandler(this.btnAdd_Click);
             this.pnlSidebar.Controls.Add(this.btnAdd);
 
             this.btnCancelAdd.Location = new System.Drawing.Point(175, 485);
             this.btnCancelAdd.Size = new System.Drawing.Size(145, 45);
             this.btnCancelAdd.Text = "Скасувати";
-            this.btnCancelAdd.BackColor = System.Drawing.Color.FromArgb(107, 114, 128); // Сірий
+            this.btnCancelAdd.BackColor = System.Drawing.Color.FromArgb(107, 114, 128);
             this.btnCancelAdd.ForeColor = System.Drawing.Color.White;
             this.btnCancelAdd.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnCancelAdd.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
             this.btnCancelAdd.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
-            this.btnCancelAdd.Visible = false; // Прихована по замовчуванню
-            this.btnCancelAdd.Click += new System.EventHandler(this.btnCancelAdd_Click);
+            this.btnCancelAdd.Visible = false;
             this.pnlSidebar.Controls.Add(this.btnCancelAdd);
 
             this.btnEdit.Location = new System.Drawing.Point(175, 485);
@@ -391,7 +401,6 @@
             this.btnEdit.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnEdit.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
             this.btnEdit.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
-            this.btnEdit.Click += new System.EventHandler(this.btnEdit_Click);
             this.pnlSidebar.Controls.Add(this.btnEdit);
 
             this.btnDelete.Location = new System.Drawing.Point(10, 540);
@@ -402,7 +411,6 @@
             this.btnDelete.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnDelete.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
             this.btnDelete.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
-            this.btnDelete.Click += new System.EventHandler(this.btnDelete_Click);
             this.pnlSidebar.Controls.Add(this.btnDelete);
 
             this.btnClear.Location = new System.Drawing.Point(175, 540);
@@ -412,28 +420,71 @@
             this.btnClear.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnClear.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
             this.btnClear.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
-            this.btnClear.Click += new System.EventHandler(this.btnClear_Click);
             this.pnlSidebar.Controls.Add(this.btnClear);
 
             // ===== DATA PANEL =====
             this.pnlData.Location = new System.Drawing.Point(380, 80);
-            this.pnlData.Size = new System.Drawing.Size(950, 600); // Початковий розмір для фулскріну
+            this.pnlData.Size = new System.Drawing.Size(950, 600);
             this.pnlData.BackColor = System.Drawing.Color.White;
             this.pnlData.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pnlData.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
-
-            this.dgvData.Location = new System.Drawing.Point(20, 70);
-            this.dgvData.Size = new System.Drawing.Size(910, 510);
-            this.dgvData.BackgroundColor = System.Drawing.Color.White;
-            this.dgvData.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.dgvData.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
 
             this.lblDataTitle.Text = "База подорожей";
             this.lblDataTitle.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Bold);
             this.lblDataTitle.Location = new System.Drawing.Point(20, 20);
             this.lblDataTitle.AutoSize = true;
 
+            // ----------------------------------------------------
+            // ПАНЕЛЬ ФІЛЬТРІВ ЖОРСТКО ФІКСОВАНА ПО ВИСОТІ
+            // ----------------------------------------------------
+            this.pnlFilters.Location = new System.Drawing.Point(20, 60);
+            this.pnlFilters.Size = new System.Drawing.Size(910, 40); // Фіксована висота
+            this.pnlFilters.BackColor = System.Drawing.Color.White;
+            this.pnlFilters.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+
+            this.lblFilterTitle.Text = "Фільтр:";
+            this.lblFilterTitle.AutoSize = true;
+            this.lblFilterTitle.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.lblFilterTitle.Location = new System.Drawing.Point(0, 8); // Чіткі координати
+
+            this.cmbFilterTours.Width = 160;
+            this.cmbFilterTours.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbFilterTours.Font = new System.Drawing.Font("Segoe UI", 10F);
+            this.cmbFilterTours.Items.AddRange(new object[] { "Активні", "Запити", "Закінчені / Відмінені", "Всі тури" });
+            this.cmbFilterTours.Location = new System.Drawing.Point(65, 5); // Чіткі координати
+
+            this.lblSearchTitle.Text = "🔍 Пошук:";
+            this.lblSearchTitle.AutoSize = true;
+            this.lblSearchTitle.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.lblSearchTitle.Location = new System.Drawing.Point(245, 8); // Чіткі координати
+
+            this.txtSearch.Width = 220;
+            this.txtSearch.Font = new System.Drawing.Font("Segoe UI", 10F);
+            this.txtSearch.Location = new System.Drawing.Point(325, 5); // Чіткі координати
+
+            this.btnContactClient.Text = "💬 Зв'язатись із клієнтом";
+            this.btnContactClient.BackColor = System.Drawing.Color.FromArgb(16, 185, 129);
+            this.btnContactClient.ForeColor = System.Drawing.Color.White;
+            this.btnContactClient.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnContactClient.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.btnContactClient.Size = new System.Drawing.Size(200, 30);
+            this.btnContactClient.Location = new System.Drawing.Point(565, 2); // Чіткі координати
+
+            this.pnlFilters.Controls.Add(this.lblFilterTitle);
+            this.pnlFilters.Controls.Add(this.cmbFilterTours);
+            this.pnlFilters.Controls.Add(this.lblSearchTitle);
+            this.pnlFilters.Controls.Add(this.txtSearch);
+            this.pnlFilters.Controls.Add(this.btnContactClient);
+
+            // Таблиця (ОПУЩЕНА ВНИЗ І НАДІЙНО ПРИКРІПЛЕНА)
+            this.dgvData.Location = new System.Drawing.Point(20, 110);
+            this.dgvData.Size = new System.Drawing.Size(910, 470);
+            this.dgvData.BackgroundColor = System.Drawing.Color.White;
+            this.dgvData.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.dgvData.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+
             this.pnlData.Controls.Add(this.lblDataTitle);
+            this.pnlData.Controls.Add(this.pnlFilters);
             this.pnlData.Controls.Add(this.dgvData);
 
             // ===== ФОРМА =====
@@ -444,12 +495,12 @@
             this.Controls.Add(this.pnlData);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Load += new System.EventHandler(MainWork_Load);
 
             this.pnlHeader.ResumeLayout(false);
             this.pnlHeader.PerformLayout();
             this.pnlSidebar.ResumeLayout(false);
             this.pnlSidebar.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pbBenefitIcon)).EndInit();
             this.tabControlInfo.ResumeLayout(false);
             this.tabRoute.ResumeLayout(false);
             this.tabRoute.PerformLayout();
@@ -464,6 +515,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.numBudget)).EndInit();
             this.pnlData.ResumeLayout(false);
             this.pnlData.PerformLayout();
+            this.pnlFilters.ResumeLayout(false);
+            this.pnlFilters.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvData)).EndInit();
             this.ResumeLayout(false);
         }
@@ -482,19 +535,21 @@
         }
 
         private System.Windows.Forms.Panel pnlHeader, pnlSidebar, pnlData;
-        private System.Windows.Forms.Label lblTitle, lblSidebarTitle, lblDataTitle;
+        private System.Windows.Forms.Panel pnlFilters; // <--- Ось тут тепер Panel замість FlowLayoutPanel
+        private System.Windows.Forms.Label lblTitle, lblSidebarTitle, lblDataTitle, lblFilterTitle, lblSearchTitle, lblFilterSpacer;
         private System.Windows.Forms.Label lblBack, lblExit;
-        private System.Windows.Forms.Button btnOpenFeed, btnAdminReturn, btnMessenger, btnOpenMap, btnAdd, btnCancelAdd, btnEdit, btnDelete, btnClear;
+        private System.Windows.Forms.Button btnOpenFeed, btnAdminReturn, btnMessenger, btnOpenMap, btnAdd, btnCancelAdd, btnEdit, btnDelete, btnClear, btnContactClient;
         private System.Windows.Forms.TabControl tabControlInfo;
         private System.Windows.Forms.TabPage tabRoute, tabLogistics, tabFinance;
-        private System.Windows.Forms.TextBox txtCountry, txtCity, txtDepartureCity, txtHotel;
+        private System.Windows.Forms.TextBox txtCountry, txtCity, txtDepartureCity, txtHotel, txtSearch;
         private System.Windows.Forms.NumericUpDown numBudget, numMarketPrice, numAdults, numChildren, numNights;
-        private System.Windows.Forms.ComboBox cmbBoard, cmbStatus, cmbAssignedUser, cmbTransport;
+        private System.Windows.Forms.ComboBox cmbBoard, cmbStatus, cmbAssignedUser, cmbTransport, cmbFilterTours;
         private System.Windows.Forms.TextBox txtDepartureStreet, txtFlightNumber, txtTerminal;
         private System.Windows.Forms.TextBox txtTransferCity, txtTransferFlightNumber, txtTransferTerminal, txtTransferStreet;
         private System.Windows.Forms.ComboBox cmbTransferTransport;
         private System.Windows.Forms.MaskedTextBox txtDepartureTime, txtTransferTime;
         private System.Windows.Forms.DateTimePicker dtpDepartureDate;
         private System.Windows.Forms.DataGridView dgvData;
+        private System.Windows.Forms.PictureBox pbBenefitIcon;
     }
 }

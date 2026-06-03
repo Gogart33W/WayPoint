@@ -88,6 +88,10 @@ namespace WayPoint
             if (btnDelete != null) { btnDelete.Click -= btnDelete_Click; btnDelete.Click += btnDelete_Click; }
             if (btnOpenWork != null) { btnOpenWork.Click -= btnOpenWork_Click; btnOpenWork.Click += btnOpenWork_Click; }
             if (btnOpenFeed != null) { btnOpenFeed.Click -= btnOpenFeed_Click; btnOpenFeed.Click += btnOpenFeed_Click; }
+
+            // ПІДКЛЮЧЕННЯ КНОПКИ АНАЛІТИКИ
+            if (btnOpenAnalytics != null) { btnOpenAnalytics.Click -= btnOpenAnalytics_Click; btnOpenAnalytics.Click += btnOpenAnalytics_Click; }
+
             if (lblBack != null) { lblBack.Click -= btnBack_Click; lblBack.Click += btnBack_Click; }
 
             if (pnlHeader != null)
@@ -129,7 +133,7 @@ namespace WayPoint
         {
             try
             {
-                SoundHelper.AttachSounds(this); // ПІДКЛЮЧЕНО ЗВУК
+                SoundHelper.AttachSounds(this);
                 LoadData();
                 EnterViewMode();
             }
@@ -151,7 +155,6 @@ namespace WayPoint
                 {
                     if (conn.State != ConnectionState.Open) conn.Open();
 
-                    // 1. Адміни та Працівники (Є колонка "Роль")
                     if (dgvAdminsWorkers != null)
                     {
                         SuspendGridEvents(dgvAdminsWorkers);
@@ -164,7 +167,6 @@ namespace WayPoint
                         ResumeGridEvents(dgvAdminsWorkers);
                     }
 
-                    // 2. Користувачі (Колонка "Роль" прихована, бо вона і так 'User')
                     if (dgvUsersOnly != null)
                     {
                         SuspendGridEvents(dgvUsersOnly);
@@ -218,7 +220,6 @@ namespace WayPoint
             }
         }
 
-        // Єдина точка налаштування колонок (залишив ТВІЙ код)
         private void SetupGridColumns(DataGridView dgv)
         {
             if (dgv?.Columns == null) return;
@@ -235,7 +236,7 @@ namespace WayPoint
                 {
                     c.Visible = true;
                     c.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-                    c.FillWeight = 100f; // Всі колонки тепер однакової, нормальної ширини!
+                    c.FillWeight = 100f;
                 }
             }
 
@@ -329,7 +330,6 @@ namespace WayPoint
             ClearSidebar();
             SetSidebarEnabled(true);
 
-            // ТУТ Я ДОДАВ РОЗБЛОКУВАННЯ КНОПОК ПРИ СТВОРЕННІ
             if (btnSave != null) btnSave.Enabled = true;
             if (btnDelete != null) btnDelete.Enabled = true;
 
@@ -411,7 +411,7 @@ namespace WayPoint
                 if (txtUsername != null) txtUsername.Text = GetCellValue(row, "Username");
                 if (txtEmail != null) txtEmail.Text = GetCellValue(row, "Email");
 
-                string role = "User"; // Дефолтне значення для другої вкладки
+                string role = "User";
                 if (row.DataGridView.Columns.Contains("Role"))
                 {
                     role = GetCellValue(row, "Role");
@@ -527,6 +527,17 @@ namespace WayPoint
             isUpdatingFromGrid = true;
             LoadData();
             isUpdatingFromGrid = false;
+        }
+
+        // === ОБРОБНИК ВІДКРИТТЯ АНАЛІТИКИ ===
+        private void btnOpenAnalytics_Click(object sender, EventArgs e)
+        {
+            this.Hide();
+            using (var form = new Forms.AdminAnalyticsForm())
+            {
+                form.ShowDialog();
+            }
+            this.Show();
         }
 
         private void btnBack_Click(object sender, EventArgs e)
@@ -767,9 +778,27 @@ namespace WayPoint
 
         private string GenerateVerificationCode() => _rnd.Next(100000, 999999).ToString();
 
-        private void pnlHeader_MouseDown(object sender, MouseEventArgs e) { dragging = true; dragCursorPoint = Cursor.Position; dragFormPoint = this.Location; }
-        private void pnlHeader_MouseMove(object sender, MouseEventArgs e) { if (dragging && this.WindowState != FormWindowState.Maximized) { Point dif = Point.Subtract(Cursor.Position, new Size(dragCursorPoint)); this.Location = Point.Add(dragFormPoint, new Size(dif)); } }
-        private void pnlHeader_MouseUp(object sender, MouseEventArgs e) => dragging = false;
+        private void pnlHeader_MouseDown(object sender, MouseEventArgs e)
+        {
+            dragging = true;
+            dragCursorPoint = Cursor.Position;
+            dragFormPoint = this.Location;
+        }
+
+        private void pnlHeader_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (dragging && this.WindowState != FormWindowState.Maximized)
+            {
+                int dx = Cursor.Position.X - dragCursorPoint.X;
+                int dy = Cursor.Position.Y - dragCursorPoint.Y;
+                this.Location = new Point(dragFormPoint.X + dx, dragFormPoint.Y + dy);
+            }
+        }
+
+        private void pnlHeader_MouseUp(object sender, MouseEventArgs e)
+        {
+            dragging = false;
+        }
 
         #endregion
     }

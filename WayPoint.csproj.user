@@ -19,6 +19,9 @@
     <Compile Update="Forms\MessengerForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="Forms\SettingsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="Forms\UserFeedForm.cs">
       <SubType>Form</SubType>
     </Compile>

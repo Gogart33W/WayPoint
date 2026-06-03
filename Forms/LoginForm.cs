@@ -13,19 +13,34 @@ namespace WayPoint
         private Point dragCursorPoint;
         private Point dragFormPoint;
 
-        // Кольори для рамок
-        private Color normalBorder = Color.FromArgb(203, 213, 225); // Світло-сірий
-        private Color focusedBorder = Color.FromArgb(79, 70, 229);  // Синій фокус
+        private Color normalBorder = Color.FromArgb(203, 213, 225);
+        private Color focusedBorder = Color.FromArgb(79, 70, 229);
 
         public LoginForm()
         {
             InitializeComponent();
-            SoundHelper.AttachSounds(this); // ПІДКЛЮЧЕНО ЗВУК
+            SoundHelper.AttachSounds(this);
+
+            // ВАЖЛИВО ДЛЯ ХОТКЕЮ: Дозволяємо формі читати натискання клавіш
+            this.KeyPreview = true;
+            this.KeyDown += LoginForm_KeyDown;
+
             isLoginMode = false;
             SwitchMode();
         }
 
-        // --- ДИНАМІЧНЕ ЦЕНТРУВАННЯ ---
+        // ОБРОБНИК СЕКРЕТНОЇ КОМБІНАЦІЇ: Ctrl + Shift + S
+        private void LoginForm_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Control && e.Shift && e.KeyCode == Keys.S)
+            {
+                using (var sf = new Forms.SettingsForm())
+                {
+                    sf.ShowDialog();
+                }
+            }
+        }
+
         private void LoginForm_Resize(object sender, EventArgs e)
         {
             if (pnlCenter != null)
@@ -35,7 +50,6 @@ namespace WayPoint
             }
         }
 
-        // --- МАЛЮВАННЯ ТОНКИХ РАМОК ІНПУТІВ ---
         private void pnlInput_Paint(object sender, PaintEventArgs e)
         {
             Panel pnl = sender as Panel;
@@ -69,14 +83,11 @@ namespace WayPoint
             txt.Parent.Invalidate();
         }
 
-        // --- ПЕРЕВІРКА НА ТИМЧАСОВИЙ ПАРОЛЬ ---
         private bool IsTemporaryPassword(string password)
         {
-            // Перевіряємо чи пароль починається на "WP" і далі йдуть рівно 4 цифри
             return Regex.IsMatch(password, @"^WP\d{4}$");
         }
 
-        // --- ЛОГІКА АВТОРИЗАЦІЇ ---
         private void btnLogin_Click(object sender, EventArgs e)
         {
             string usernameOrEmail = txtUsername.Text.Trim();
@@ -95,7 +106,6 @@ namespace WayPoint
                     var user = AuthManager.Login(usernameOrEmail, password);
                     if (user != null)
                     {
-                        // ПЕРЕХОПЛЕННЯ ТИМЧАСОВОГО ПАРОЛЯ
                         if (IsTemporaryPassword(password))
                         {
                             string newPass = ChangePasswordPrompt.ShowDialog(
@@ -105,15 +115,13 @@ namespace WayPoint
                             if (string.IsNullOrEmpty(newPass))
                             {
                                 MessageBox.Show("Ви повинні змінити пароль, щоб увійти в систему.", "Вхід скасовано", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                                return; // Блокуємо вхід, якщо юзер натиснув "Скасувати"
+                                return;
                             }
 
-                            // Зберігаємо новий пароль у базу
                             AuthManager.UpdatePassword(user.Username, newPass);
                             MessageBox.Show("Ваш пароль успішно оновлено!", "Успіх", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         }
 
-                        // Якщо все ок - пускаємо в систему
                         this.Hide();
                         Form nextForm;
 
@@ -191,9 +199,8 @@ namespace WayPoint
 
             if (isLoginMode)
             {
-                // === РЕЖИМ ВХОДУ ===
                 btnLogin.Text = "УВІЙТИ";
-                btnLogin.BackColor = Color.FromArgb(16, 185, 129); // Emerald-500
+                btnLogin.BackColor = Color.FromArgb(16, 185, 129);
                 lblSubtitle.Text = "Вхід у систему";
                 lblUsername.Text = "Логін або Пошта";
 
@@ -221,9 +228,8 @@ namespace WayPoint
             }
             else
             {
-                // === РЕЖИМ РЕЄСТРАЦІЇ ===
                 btnLogin.Text = "ЗАРЕЄСТРУВАТИСЯ";
-                btnLogin.BackColor = Color.FromArgb(79, 70, 229); // Indigo-600
+                btnLogin.BackColor = Color.FromArgb(79, 70, 229);
                 lblSubtitle.Text = "Створення нового акаунта";
                 lblUsername.Text = "Придумайте логін";
 
@@ -301,11 +307,19 @@ namespace WayPoint
         private void btnExit_Click(object sender, EventArgs e) => Application.Exit();
 
         private void pnlBackground_MouseDown(object sender, MouseEventArgs e) { dragging = true; dragCursorPoint = System.Windows.Forms.Cursor.Position; dragFormPoint = this.Location; }
-        private void pnlBackground_MouseMove(object sender, MouseEventArgs e) { if (dragging && this.WindowState != FormWindowState.Maximized) { Point dif = Point.Subtract(System.Windows.Forms.Cursor.Position, new Size(dragCursorPoint)); this.Location = Point.Add(dragFormPoint, new Size(dif)); } }
+        private void pnlBackground_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (dragging && this.WindowState != FormWindowState.Maximized)
+            {
+                this.Location = new Point(
+                    dragFormPoint.X + System.Windows.Forms.Cursor.Position.X - dragCursorPoint.X,
+                    dragFormPoint.Y + System.Windows.Forms.Cursor.Position.Y - dragCursorPoint.Y
+                );
+            }
+        }
         private void pnlBackground_MouseUp(object sender, MouseEventArgs e) => dragging = false;
     }
 
-    // ===== ПРОМПТ ДЛЯ ЗВИЧАЙНОГО ВВЕДЕННЯ (Код / Логін) =====
     public static class CustomPrompt
     {
         public static string ShowDialog(string text, string caption)
@@ -361,7 +375,7 @@ namespace WayPoint
             prompt.AcceptButton = confirmation;
             prompt.CancelButton = cancel;
 
-            SoundHelper.AttachSounds(prompt); // ПІДКЛЮЧЕНО ЗВУК ДО ВІКНА
+            SoundHelper.AttachSounds(prompt);
 
             prompt.Shown += (s, e) => textBox.Focus();
 
@@ -369,7 +383,6 @@ namespace WayPoint
         }
     }
 
-    // ===== НОВИЙ ПРОМПТ ДЛЯ ЗМІНИ ТИМЧАСОВОГО ПАРОЛЯ =====
     public static class ChangePasswordPrompt
     {
         public static string ShowDialog(string caption, string subtitle)
@@ -390,7 +403,6 @@ namespace WayPoint
             Label lblCaption = new Label() { Left = 30, Top = 20, Text = caption, Width = 360, Font = new Font("Segoe UI Black", 14, FontStyle.Bold), ForeColor = Color.FromArgb(15, 23, 42) };
             Label lblSubtitle = new Label() { Left = 30, Top = 50, Text = subtitle, Width = 360, Height = 40, Font = new Font("Segoe UI", 9.5F), ForeColor = Color.FromArgb(100, 116, 139) };
 
-            // Новий пароль
             Label lblPass1 = new Label() { Left = 30, Top = 100, Text = "Новий пароль:", Width = 360, Height = 20, Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold), ForeColor = Color.FromArgb(71, 85, 105) };
             Panel pnlInput1 = new Panel() { Left = 30, Top = 125, Width = 360, Height = 42, BackColor = Color.White, Padding = new Padding(1) };
             TextBox txtPass1 = new TextBox() { Location = new Point(5, 5), Width = 350, Font = new Font("Segoe UI", 13), BackColor = Color.White, BorderStyle = BorderStyle.None, ForeColor = Color.Black, UseSystemPasswordChar = true };
@@ -399,7 +411,6 @@ namespace WayPoint
             txtPass1.Enter += (s, e) => pnlInput1.Invalidate();
             txtPass1.Leave += (s, e) => pnlInput1.Invalidate();
 
-            // Повтор пароля
             Label lblPass2 = new Label() { Left = 30, Top = 175, Text = "Повторіть пароль:", Width = 360, Height = 20, Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold), ForeColor = Color.FromArgb(71, 85, 105) };
             Panel pnlInput2 = new Panel() { Left = 30, Top = 200, Width = 360, Height = 42, BackColor = Color.White, Padding = new Padding(1) };
             TextBox txtPass2 = new TextBox() { Location = new Point(5, 5), Width = 350, Font = new Font("Segoe UI", 13), BackColor = Color.White, BorderStyle = BorderStyle.None, ForeColor = Color.Black, UseSystemPasswordChar = true };
@@ -424,7 +435,6 @@ namespace WayPoint
             confirmation.Width = buttonWidth;
             confirmation.Left = cancel.Right + 15;
 
-            // Валідація
             confirmation.Click += (s, e) => {
                 if (string.IsNullOrWhiteSpace(txtPass1.Text))
                 {
@@ -451,7 +461,7 @@ namespace WayPoint
             prompt.AcceptButton = confirmation;
             prompt.CancelButton = cancel;
 
-            SoundHelper.AttachSounds(prompt); // ПІДКЛЮЧЕНО ЗВУК ДО ВІКНА
+            SoundHelper.AttachSounds(prompt);
 
             prompt.Shown += (s, e) => txtPass1.Focus();
 

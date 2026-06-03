@@ -8,11 +8,9 @@ namespace WayPoint.Services
 {
     public static class EmailService
     {
-        // Твій GMAIL
-        private static string myEmail = "hofart33w@gmail.com";
-
-        // Твій пароль додатка
-        private static string appPassword = "fngckxswddfzgzxf";
+        // ТЕПЕР ТЯГНЕМО З ФАЙЛУ config.json (БЕЗ ХАРДКОДУ)
+        private static string myEmail => ConfigManager.Config.SmtpEmail;
+        private static string appPassword => ConfigManager.Config.SmtpPassword;
 
         public static bool SendVerificationCode(string toEmail, string code)
         {

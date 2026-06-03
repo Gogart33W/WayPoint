@@ -122,3 +122,4 @@ E:\recov\Study\Kyrop\WayPoint\WayPoint\obj\Debug\net8.0-windows\ref\WayPoint.dll
 E:\recov\Study\Kyrop\WayPoint\WayPoint\obj\Debug\net8.0-windows\WayPoint.MessengerForm.resources
 E:\recov\Study\Kyrop\WayPoint\WayPoint\obj\Debug\net8.0-windows\WayPoint.Login.resources
 E:\recov\Study\Kyrop\WayPoint\WayPoint\obj\Debug\net8.0-windows\WayPoint.Forms.AdminAnalyticsForm.resources
+E:\recov\Study\Kyrop\WayPoint\WayPoint\obj\Debug\net8.0-windows\WayPoint.Forms.SettingsForm.resources

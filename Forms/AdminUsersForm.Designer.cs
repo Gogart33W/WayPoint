@@ -23,7 +23,8 @@ namespace WayPoint
         private Button btnNewAccount;
         private Button btnOpenWork;
         private Button btnOpenFeed;
-        private Button btnOpenAnalytics; // КНОПКА АНАЛІТИКИ
+        private Button btnOpenAnalytics;
+        private Button btnSettings; // КНОПКА НАЛАШТУВАНЬ
 
         private TabControl tabControl;
         private TabPage tabAdminsWorkers;
@@ -70,6 +71,7 @@ namespace WayPoint
             this.lblBack.Location = new Point(15, 12);
             this.lblBack.AutoSize = true;
             this.lblBack.Cursor = Cursors.Hand;
+            this.lblBack.Click += new EventHandler(this.btnBack_Click);
             this.lblBack.MouseEnter += (s, e) => this.lblBack.ForeColor = Color.White;
             this.lblBack.MouseLeave += (s, e) => this.lblBack.ForeColor = Color.LightGray;
 
@@ -80,6 +82,7 @@ namespace WayPoint
             this.lblExit.AutoSize = true;
             this.lblExit.Cursor = Cursors.Hand;
             this.lblExit.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            this.lblExit.Click += (s, e) => Application.Exit();
             this.lblExit.MouseEnter += (s, e) => this.lblExit.ForeColor = Color.White;
             this.lblExit.MouseLeave += (s, e) => this.lblExit.ForeColor = Color.LightGray;
 
@@ -91,7 +94,7 @@ namespace WayPoint
             this.pnlSidebar = new Panel();
             this.pnlSidebar.BackColor = Color.White;
             this.pnlSidebar.Location = new Point(20, 80);
-            this.pnlSidebar.Size = new Size(320, 620);
+            this.pnlSidebar.Size = new Size(320, 680);
             this.pnlSidebar.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
 
             this.lblSidebarTitle = new Label();
@@ -190,7 +193,6 @@ namespace WayPoint
             this.btnOpenFeed.Cursor = Cursors.Hand;
             this.btnOpenFeed.Enabled = true;
 
-            // КНОПКА АНАЛІТИКИ
             this.btnOpenAnalytics = new Button();
             this.btnOpenAnalytics.Location = new Point(20, 568);
             this.btnOpenAnalytics.Size = new Size(275, 42);
@@ -201,6 +203,18 @@ namespace WayPoint
             this.btnOpenAnalytics.FlatStyle = FlatStyle.Flat;
             this.btnOpenAnalytics.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
             this.btnOpenAnalytics.Cursor = Cursors.Hand;
+
+            // КНОПКА НАЛАШТУВАНЬ
+            this.btnSettings = new Button();
+            this.btnSettings.Location = new Point(20, 616);
+            this.btnSettings.Size = new Size(275, 42);
+            this.btnSettings.Text = "⚙️ Налаштування системи";
+            this.btnSettings.BackColor = Color.FromArgb(71, 85, 105);
+            this.btnSettings.ForeColor = Color.White;
+            this.btnSettings.FlatAppearance.BorderSize = 0;
+            this.btnSettings.FlatStyle = FlatStyle.Flat;
+            this.btnSettings.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
+            this.btnSettings.Cursor = Cursors.Hand;
 
             this.pnlSidebar.Controls.Add(this.lblSidebarTitle);
             this.pnlSidebar.Controls.Add(this.txtUsername);
@@ -213,6 +227,7 @@ namespace WayPoint
             this.pnlSidebar.Controls.Add(this.btnOpenWork);
             this.pnlSidebar.Controls.Add(this.btnOpenFeed);
             this.pnlSidebar.Controls.Add(this.btnOpenAnalytics);
+            this.pnlSidebar.Controls.Add(this.btnSettings);
 
             // ===== TAB CONTROL =====
             this.tabControl = new TabControl();
@@ -329,6 +344,10 @@ namespace WayPoint
             this.Controls.Add(this.pnlHeader);
             this.Controls.Add(this.pnlSidebar);
             this.Controls.Add(this.tabControl);
+
+            this.pnlHeader.MouseDown += new MouseEventHandler(this.pnlHeader_MouseDown);
+            this.pnlHeader.MouseMove += new MouseEventHandler(this.pnlHeader_MouseMove);
+            this.pnlHeader.MouseUp += new MouseEventHandler(this.pnlHeader_MouseUp);
 
             this.pnlHeader.ResumeLayout(false);
             this.pnlHeader.PerformLayout();

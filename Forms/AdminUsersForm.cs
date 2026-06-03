@@ -88,9 +88,10 @@ namespace WayPoint
             if (btnDelete != null) { btnDelete.Click -= btnDelete_Click; btnDelete.Click += btnDelete_Click; }
             if (btnOpenWork != null) { btnOpenWork.Click -= btnOpenWork_Click; btnOpenWork.Click += btnOpenWork_Click; }
             if (btnOpenFeed != null) { btnOpenFeed.Click -= btnOpenFeed_Click; btnOpenFeed.Click += btnOpenFeed_Click; }
-
-            // ПІДКЛЮЧЕННЯ КНОПКИ АНАЛІТИКИ
             if (btnOpenAnalytics != null) { btnOpenAnalytics.Click -= btnOpenAnalytics_Click; btnOpenAnalytics.Click += btnOpenAnalytics_Click; }
+
+            // КНОПКА НАЛАШТУВАНЬ
+            if (btnSettings != null) { btnSettings.Click -= btnSettings_Click; btnSettings.Click += btnSettings_Click; }
 
             if (lblBack != null) { lblBack.Click -= btnBack_Click; lblBack.Click += btnBack_Click; }
 
@@ -529,7 +530,6 @@ namespace WayPoint
             isUpdatingFromGrid = false;
         }
 
-        // === ОБРОБНИК ВІДКРИТТЯ АНАЛІТИКИ ===
         private void btnOpenAnalytics_Click(object sender, EventArgs e)
         {
             this.Hide();
@@ -538,6 +538,15 @@ namespace WayPoint
                 form.ShowDialog();
             }
             this.Show();
+        }
+
+        // ОБРОБНИК КНОПКИ НАЛАШТУВАНЬ
+        private void btnSettings_Click(object sender, EventArgs e)
+        {
+            using (var sf = new Forms.SettingsForm())
+            {
+                sf.ShowDialog();
+            }
         }
 
         private void btnBack_Click(object sender, EventArgs e)
@@ -778,27 +787,20 @@ namespace WayPoint
 
         private string GenerateVerificationCode() => _rnd.Next(100000, 999999).ToString();
 
-        private void pnlHeader_MouseDown(object sender, MouseEventArgs e)
-        {
-            dragging = true;
-            dragCursorPoint = Cursor.Position;
-            dragFormPoint = this.Location;
-        }
+        private void pnlHeader_MouseDown(object sender, MouseEventArgs e) { dragging = true; dragCursorPoint = Cursor.Position; dragFormPoint = this.Location; }
 
         private void pnlHeader_MouseMove(object sender, MouseEventArgs e)
         {
             if (dragging && this.WindowState != FormWindowState.Maximized)
             {
-                int dx = Cursor.Position.X - dragCursorPoint.X;
-                int dy = Cursor.Position.Y - dragCursorPoint.Y;
-                this.Location = new Point(dragFormPoint.X + dx, dragFormPoint.Y + dy);
+                this.Location = new Point(
+                    dragFormPoint.X + Cursor.Position.X - dragCursorPoint.X,
+                    dragFormPoint.Y + Cursor.Position.Y - dragCursorPoint.Y
+                );
             }
         }
 
-        private void pnlHeader_MouseUp(object sender, MouseEventArgs e)
-        {
-            dragging = false;
-        }
+        private void pnlHeader_MouseUp(object sender, MouseEventArgs e) => dragging = false;
 
         #endregion
     }
